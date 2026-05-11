@@ -5,7 +5,7 @@ import com.yjailbir.core.dto.TransactionStatus;
 import com.yjailbir.core.dto.ValidationResultDto;
 import com.yjailbir.core.entity.PaymentEntity;
 import com.yjailbir.core.entity.TransactionEntity;
-import com.yjailbir.core.repository.TransactionChainRepository;
+import com.yjailbir.core.repository.PaymentsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -18,22 +18,22 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 @RequiredArgsConstructor
 public class TransactionChainService {
-    private final TransactionChainRepository transactionChainRepository;
+    private final PaymentsRepository paymentsRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
 
     @Transactional
     public void save(TransactionDtoFromBank dto) {
-        PaymentEntity chain = transactionChainRepository
+        PaymentEntity chain = paymentsRepository
                 .findByTransactionId(dto.paymentId())
                 .orElseGet(() -> {
                     PaymentEntity newChain = new PaymentEntity(dto.paymentId());
-                    return transactionChainRepository.save(newChain);
+                    return paymentsRepository.save(newChain);
                 });
 
         TransactionEntity step = new TransactionEntity(dto, chain);
         chain.addStep(step);
-        transactionChainRepository.save(chain);
+        paymentsRepository.save(chain);
 
         //todo добавить уникальный айди в каждую транзакцию первичным
         // Валидация (замокана)

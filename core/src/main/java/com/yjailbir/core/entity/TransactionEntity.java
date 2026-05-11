@@ -18,8 +18,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class TransactionEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
     @Column(name = "transaction_id")
     private UUID transactionId;
     @ManyToOne(fetch = FetchType.LAZY)
@@ -31,39 +30,49 @@ public class TransactionEntity {
     @Column(name = "sender")
     private String sender;
     @Column(name = "receiver")
-    private String reciever;
+    private String receiver;
     @Column(name = "sum_in")
     private Long sumIn;
     @Column(name = "sum_out")
     private Long sumOut;
     @Column(name = "commission_value")
-    Long commissionValue;
+    private Long commissionValue;
     @Column(name = "commission_percents")
-    Integer commissionPercents;
+    private Integer commissionPercents;
     @Column(name = "fixed_commission")
-    Integer fixedCommission;
+    private Integer fixedCommission;
     @Column(name = "timestamp")
-    LocalDateTime timestamp;
+    private LocalDateTime timestamp;
+    @Column(name = "from_currency")
+    private String fromCurrency;
+    @Column(name = "to_currency")
+    private String toCurrency;
+    @Column(name = "course")
+    private  Float multiplier;
 
     public TransactionEntity(TransactionDtoFromBank dto, PaymentEntity chain) {
+        this.id = dto.paymentId();
         this.transactionId = dto.paymentId();
         this.chain = chain;
         this.status = TransactionStatus.PENDING;
         this.sender = dto.from();
-        this.reciever = dto.to();
+        this.receiver = dto.to();
         this.sumIn = dto.sumIn();
         this.sumOut = dto.sumOut();
         this.commissionValue = dto.commissionValue();
         this.commissionPercents = dto.commissionPercents();
         this.fixedCommission = dto.fixedCommission();
         this.timestamp = dto.timestamp();
+        this.fromCurrency = dto.fromCurrency();
+        this.toCurrency = dto.toCurrency();
+        this.multiplier = dto.multiplier();
     }
 
     public TransactionEntityDto toDto() {
         return new TransactionEntityDto(
                 this.status,
                 this.sender,
-                this.reciever,
+                this.receiver,
                 this.sumIn,
                 this.sumOut,
                 this.commissionValue,

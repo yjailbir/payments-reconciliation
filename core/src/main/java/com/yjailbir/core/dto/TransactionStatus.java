@@ -6,6 +6,7 @@ public enum TransactionStatus {
     SUCCESS("Успешно"),
     FAILURE("Ошибка"),
     PENDING("В обработке"),
+    WARNING("Требует внимания"),
     NOT_FOUND("Транзакиця не найдена");
 
     private final String description;

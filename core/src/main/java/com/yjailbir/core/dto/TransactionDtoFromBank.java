@@ -14,6 +14,9 @@ public record TransactionDtoFromBank(
         Long commissionValue,
         Integer commissionPercents,
         Integer fixedCommission,
-        LocalDateTime timestamp
+        LocalDateTime timestamp,
+        String fromCurrency,
+        String toCurrency,
+        Float multiplier
 ) {
 }
