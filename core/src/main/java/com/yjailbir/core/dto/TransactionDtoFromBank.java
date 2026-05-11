@@ -19,6 +19,6 @@ public record TransactionDtoFromBank(
         LocalDateTime timestamp,
         String fromCurrency,
         String toCurrency,
-        Float multiplier
+        Double multiplier
 ) {
 }

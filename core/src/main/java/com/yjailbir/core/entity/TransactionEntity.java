@@ -52,7 +52,7 @@ public class TransactionEntity {
     @Column(name = "to_currency")
     private String toCurrency;
     @Column(name = "course")
-    private  Float multiplier;
+    private Double multiplier;
 
     public TransactionEntity(TransactionDtoFromBank dto, PaymentEntity chain) {
         this.id = dto.paymentId();
