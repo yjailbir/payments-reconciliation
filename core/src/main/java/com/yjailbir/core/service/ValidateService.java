@@ -48,6 +48,7 @@ public class ValidateService {
 
     private ValidationResultDto validateInnerTransactionData(TransactionEntity entity) {
         List<String> comments = new ArrayList<>();
+        boolean isOk = true;
 
         // 1. Извлечение основных полей
         Long sumInObj = entity.getSumIn();
@@ -64,7 +65,7 @@ public class ValidateService {
         // Критические поля
         if (sumInObj == null || sumOutObj == null) {
             comments.add("Сумма входа/выхода не задана");
-            return failure(entity, comments);
+            isOk = false;
         }
 
         long sumInL = sumInObj;
@@ -76,20 +77,20 @@ public class ValidateService {
 
         if (sumInL < 0 || sumOutL < 0 || perc < 0 || fixed < 0 || statedComm < 0) {
             comments.add("Обнаружены отрицательные значения сумм/комиссий");
-            return failure(entity, comments);
+            isOk = false;
         }
 
         // 2. Режим округления (общий и для конвертации, и для комиссий)
-        RoundingMode rm;
+        RoundingMode rm = null;
         if (roundingModeStr == null || roundingModeStr.isBlank()) {
             comments.add("Не указан режим округления");
-            return failure(entity, comments);
+            isOk = false;
         }
         try {
             rm = RoundingMode.valueOf(roundingModeStr);
         } catch (IllegalArgumentException e) {
             comments.add("Некорректный режим округления: " + roundingModeStr);
-            return failure(entity, comments);
+            isOk = false;
         }
 
         final int SCALE = 2;
@@ -104,7 +105,7 @@ public class ValidateService {
 
         if (conversionNeeded && (multiplier == null || multiplier <= 0.0f)) {
             comments.add("Некорректный множитель конверсии для разных валют: " + multiplier);
-            return failure(entity, comments);
+            isOk = false;
         }
 
         // Базовая сумма, от которой будут считаться комиссии
@@ -126,7 +127,7 @@ public class ValidateService {
                     expectedSumOut.toPlainString(),
                     conversionNeeded ? toCurrency : fromCurrency,
                     sumOut.toPlainString()));
-            return failure(entity, comments);
+            isOk = false;
         }
 
         // 6. Проверка заявленной комиссии
@@ -138,12 +139,15 @@ public class ValidateService {
                     actualCommission.toPlainString(),
                     conversionNeeded ? toCurrency : fromCurrency,
                     statedCommission.toPlainString()));
-            return failure(entity, comments);
+            isOk = false;
         }
-
-        // Всё корректно
-        return new ValidationResultDto(TransactionStatus.SUCCESS.getDescription(),
-                entity.getTimestamp(), comments);
+        if (isOk) {
+            return new ValidationResultDto(TransactionStatus.SUCCESS.getDescription(),
+                    entity.getTimestamp(), comments);
+        } else {
+            return new ValidationResultDto(TransactionStatus.FAILURE.getDescription(),
+                    entity.getTimestamp(), comments);
+        }
     }
 
 // ------------------- Хелперы -------------------
@@ -204,10 +208,5 @@ public class ValidateService {
 
     private boolean isNotBlank(String str) {
         return str != null && !str.isBlank();
-    }
-
-    private ValidationResultDto failure(TransactionEntity entity, List<String> comments) {
-        return new ValidationResultDto(TransactionStatus.FAILURE.getDescription(),
-                entity.getTimestamp(), comments);
     }
 }
