@@ -5,7 +5,6 @@ import java.util.UUID;
 
 public record TransactionDto(
         UUID transactionId,
-        TransactionStatus status,
         TransactionType transactionType,
         String from,
         String to,
