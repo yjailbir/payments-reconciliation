@@ -44,17 +44,17 @@ public class TransactionEntity {
     @Column(name = "timestamp")
     LocalDateTime timestamp;
 
-    public TransactionEntity(TransactionDto transactionDto, TransactionChainEntity transactionChainEntity) {
-        this.transactionId = transactionDto.transactionId();
-        this.chain = transactionChainEntity;
+    public TransactionEntity(TransactionDto dto, TransactionChainEntity chain) {
+        this.transactionId = dto.transactionId();
+        this.chain = chain;
         this.status = TransactionStatus.PENDING;
-        this.sender = transactionDto.from();
-        this.reciever = transactionDto.to();
-        this.sumIn = transactionDto.sumIn();
-        this.sumOut = transactionDto.sumOut();
-        this.commissionValue = transactionDto.commissionValue();
-        this.commissionPercents = transactionDto.commissionPercents();
-        this.fixedCommission = transactionDto.fixedCommission();
-        this.timestamp = transactionDto.timestamp();
+        this.sender = dto.from();
+        this.reciever = dto.to();
+        this.sumIn = dto.sumIn();
+        this.sumOut = dto.sumOut();
+        this.commissionValue = dto.commissionValue();
+        this.commissionPercents = dto.commissionPercents();
+        this.fixedCommission = dto.fixedCommission();
+        this.timestamp = dto.timestamp();
     }
 }

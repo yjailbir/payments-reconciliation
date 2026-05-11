@@ -33,15 +33,15 @@ public class TransactionChainEntity {
     @Column(name = "last_sum")
     private Long lastSum;
 
-    public TransactionChainEntity(UUID id) {
-        this.transactionId = id;
+    public TransactionChainEntity(UUID transactionId) {
+        this.transactionId = transactionId;
         this.created = LocalDateTime.now();
-        this.steps = new ArrayList<>();
+        this.lastUpdated = LocalDateTime.now();
     }
 
-    public void addStep(TransactionDto transactionDto) {
-        this.steps.add(
-                new TransactionEntity(transactionDto, this)
-        );
+    public void addStep(TransactionEntity step) {
+        steps.add(step);
+        step.setChain(this);
+        this.lastUpdated = LocalDateTime.now();
     }
 }
