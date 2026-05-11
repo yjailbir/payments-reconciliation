@@ -1,6 +1,6 @@
 package com.yjailbir.core.controller.rest;
 
-import com.yjailbir.core.dto.TransactionDto;
+import com.yjailbir.core.dto.TransactionDtoFromBank;
 import com.yjailbir.core.service.TransactionChainService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +20,8 @@ public class TransactionsRestController {
     private final TransactionChainService transactionChainService;
 
     @PostMapping("/add")
-    public void add (@RequestBody List<TransactionDto> list) {
-        for (TransactionDto dto : list) {
+    public void add (@RequestBody List<TransactionDtoFromBank> list) {
+        for (TransactionDtoFromBank dto : list) {
             transactionChainService.save(dto);
         }
     }

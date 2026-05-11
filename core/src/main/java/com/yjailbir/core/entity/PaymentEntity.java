@@ -1,8 +1,5 @@
 package com.yjailbir.core.entity;
 
-import com.yjailbir.core.dto.ChainDetailsDto;
-import com.yjailbir.core.dto.TransactionDetailsDto;
-import com.yjailbir.core.dto.TransactionDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +15,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-public class TransactionChainEntity {
+public class PaymentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -35,7 +32,7 @@ public class TransactionChainEntity {
     @Column(name = "last_sum")
     private Long lastSum;
 
-    public TransactionChainEntity(UUID transactionId) {
+    public PaymentEntity(UUID transactionId) {
         this.transactionId = transactionId;
         this.created = LocalDateTime.now();
         this.lastUpdated = LocalDateTime.now();
@@ -45,14 +42,5 @@ public class TransactionChainEntity {
         steps.add(step);
         step.setChain(this);
         this.lastUpdated = LocalDateTime.now();
-    }
-
-    public ChainDetailsDto toDto() {
-        List<TransactionDetailsDto> transactionDetailsList = this.steps.stream().map(TransactionEntity::toDto).toList();
-
-        return new ChainDetailsDto(
-                this.transactionId,
-                transactionDetailsList
-        );
     }
 }

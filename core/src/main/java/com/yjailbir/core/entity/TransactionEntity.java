@@ -1,7 +1,7 @@
 package com.yjailbir.core.entity;
 
-import com.yjailbir.core.dto.TransactionDetailsDto;
-import com.yjailbir.core.dto.TransactionDto;
+import com.yjailbir.core.dto.TransactionEntityDto;
+import com.yjailbir.core.dto.TransactionDtoFromBank;
 import com.yjailbir.core.dto.TransactionStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -24,7 +24,7 @@ public class TransactionEntity {
     private UUID transactionId;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chain_id")
-    private TransactionChainEntity chain;
+    private PaymentEntity chain;
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private TransactionStatus status;
@@ -45,8 +45,8 @@ public class TransactionEntity {
     @Column(name = "timestamp")
     LocalDateTime timestamp;
 
-    public TransactionEntity(TransactionDto dto, TransactionChainEntity chain) {
-        this.transactionId = dto.transactionId();
+    public TransactionEntity(TransactionDtoFromBank dto, PaymentEntity chain) {
+        this.transactionId = dto.paymentId();
         this.chain = chain;
         this.status = TransactionStatus.PENDING;
         this.sender = dto.from();
@@ -59,8 +59,8 @@ public class TransactionEntity {
         this.timestamp = dto.timestamp();
     }
 
-    public TransactionDetailsDto toDto() {
-        return new TransactionDetailsDto(
+    public TransactionEntityDto toDto() {
+        return new TransactionEntityDto(
                 this.status,
                 this.sender,
                 this.reciever,

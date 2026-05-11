@@ -1,9 +1,9 @@
 package com.yjailbir.core.service;
 
-import com.yjailbir.core.dto.TransactionDto;
+import com.yjailbir.core.dto.TransactionDtoFromBank;
 import com.yjailbir.core.dto.TransactionStatus;
 import com.yjailbir.core.dto.ValidationResultDto;
-import com.yjailbir.core.entity.TransactionChainEntity;
+import com.yjailbir.core.entity.PaymentEntity;
 import com.yjailbir.core.entity.TransactionEntity;
 import com.yjailbir.core.repository.TransactionChainRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +22,11 @@ public class TransactionChainService {
    private final SimpMessagingTemplate messagingTemplate;
 
     @Transactional
-    public void save(TransactionDto dto) {
-        TransactionChainEntity chain = transactionChainRepository
-                .findByTransactionId(dto.transactionId())
+    public void save(TransactionDtoFromBank dto) {
+        PaymentEntity chain = transactionChainRepository
+                .findByTransactionId(dto.paymentId())
                 .orElseGet(() -> {
-                    TransactionChainEntity newChain = new TransactionChainEntity(dto.transactionId());
+                    PaymentEntity newChain = new PaymentEntity(dto.paymentId());
                     return transactionChainRepository.save(newChain);
                 });
 
@@ -34,6 +34,7 @@ public class TransactionChainService {
         chain.addStep(step);
         transactionChainRepository.save(chain);
 
+        //todo добавить уникальный айди в каждую транзакцию первичным
         // Валидация (замокана)
 
        //messagingTemplate.convertAndSend("/topic/transactions", newChain.toDto());

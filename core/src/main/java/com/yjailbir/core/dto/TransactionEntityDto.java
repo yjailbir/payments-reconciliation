@@ -1,13 +1,11 @@
 package com.yjailbir.core.dto;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
-public record TransactionDto(
-        UUID transactionId,
-        TransactionType transactionType,
-        String from,
-        String to,
+public record TransactionEntityDto(
+        TransactionStatus status,
+        String sender,
+        String reciever,
         Long sumIn,
         Long sumOut,
         Long commissionValue,
