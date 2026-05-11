@@ -52,5 +52,6 @@ public class TransactionChainService {
 
         ValidationResultDto dto = new ValidationResultDto(status, LocalDateTime.now());
         messagingTemplate.convertAndSend("/topic/transactions", dto);
+        System.out.println("SEND MOCK");
     }
 }
