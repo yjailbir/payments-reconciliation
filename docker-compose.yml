@@ -3,7 +3,7 @@ services:
     build:
       context: ./core
     ports:
-      - "8081:8080"
+      - "8080:8080"
     container_name: core
 
   rabbitmq:
