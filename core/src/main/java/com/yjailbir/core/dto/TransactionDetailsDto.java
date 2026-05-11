@@ -1,0 +1,16 @@
+package com.yjailbir.core.dto;
+
+import java.time.LocalDateTime;
+
+public record TransactionDetailsDto(
+        TransactionStatus status,
+        String sender,
+        String reciever,
+        Long sumIn,
+        Long sumOut,
+        Long commissionValue,
+        Integer commissionPercents,
+        Integer fixedCommission,
+        LocalDateTime timestamp
+) {
+}

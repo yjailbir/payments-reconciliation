@@ -1,5 +1,6 @@
 package com.yjailbir.core.entity;
 
+import com.yjailbir.core.dto.TransactionDetailsDto;
 import com.yjailbir.core.dto.TransactionDto;
 import com.yjailbir.core.dto.TransactionStatus;
 import jakarta.persistence.*;
@@ -56,5 +57,19 @@ public class TransactionEntity {
         this.commissionPercents = dto.commissionPercents();
         this.fixedCommission = dto.fixedCommission();
         this.timestamp = dto.timestamp();
+    }
+
+    public TransactionDetailsDto toDto() {
+        return new TransactionDetailsDto(
+                this.status,
+                this.sender,
+                this.reciever,
+                this.sumIn,
+                this.sumOut,
+                this.commissionValue,
+                this.commissionPercents,
+                this.fixedCommission,
+                this.timestamp
+        );
     }
 }

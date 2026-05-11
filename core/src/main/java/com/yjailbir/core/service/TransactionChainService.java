@@ -32,6 +32,6 @@ public class TransactionChainService {
 
         // Валидация (замокана)
 
-       messagingTemplate.convertAndSend("/topic/transactions", newChain);
+       messagingTemplate.convertAndSend("/topic/transactions", newChain.toDto());
     }
 }
