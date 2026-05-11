@@ -14,6 +14,8 @@ public record TransactionDtoFromBank(
         Long commissionValue,
         Integer commissionPercents,
         Integer fixedCommission,
+        String roundingMode,
+        Boolean percentsFirst,
         LocalDateTime timestamp,
         String fromCurrency,
         String toCurrency,

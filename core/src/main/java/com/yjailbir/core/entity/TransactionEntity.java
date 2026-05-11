@@ -41,6 +41,10 @@ public class TransactionEntity {
     private Integer commissionPercents;
     @Column(name = "fixed_commission")
     private Integer fixedCommission;
+    @Column(name = "rounding_mode")
+    private String roundingMode;
+    @Column(name = "percents_first")
+    private Boolean percentsFirst;
     @Column(name = "timestamp")
     private LocalDateTime timestamp;
     @Column(name = "from_currency")
@@ -62,6 +66,8 @@ public class TransactionEntity {
         this.commissionValue = dto.commissionValue();
         this.commissionPercents = dto.commissionPercents();
         this.fixedCommission = dto.fixedCommission();
+        this.roundingMode = dto.roundingMode();
+        this.percentsFirst = dto.percentsFirst();
         this.timestamp = dto.timestamp();
         this.fromCurrency = dto.fromCurrency();
         this.toCurrency = dto.toCurrency();
