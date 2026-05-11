@@ -1,0 +1,49 @@
+package com.yjailbir.core.entity;
+
+import com.yjailbir.core.dto.TransactionDto;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Entity
+@Table(name = "transaction_chains")
+@Getter
+@Setter
+@NoArgsConstructor
+public class TransactionChainEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(name = "transaction_id")
+    private UUID transactionId;
+    @Column(name = "created", updatable = false)
+    private LocalDateTime created;
+    @Column(name = "last_updated")
+    private LocalDateTime lastUpdated;
+    @OneToMany(mappedBy = "chain", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TransactionEntity> steps = new ArrayList<>();
+    @Column(name = "start_sum")
+    private Long startSum;
+    @Column(name = "last_sum")
+    private Long lastSum;
+
+    public TransactionChainEntity(UUID id) {
+        this.transactionId = id;
+        this.created = LocalDateTime.now();
+        this.steps = new ArrayList<>();
+    }
+
+    public void addStep(TransactionDto transactionDto) {
+        this.steps.add(
+                new TransactionEntity(transactionDto, this)
+        );
+    }
+}
