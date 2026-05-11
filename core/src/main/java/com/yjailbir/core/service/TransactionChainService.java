@@ -1,13 +1,19 @@
 package com.yjailbir.core.service;
 
 import com.yjailbir.core.dto.TransactionDto;
+import com.yjailbir.core.dto.TransactionStatus;
+import com.yjailbir.core.dto.ValidationResultDto;
 import com.yjailbir.core.entity.TransactionChainEntity;
 import com.yjailbir.core.entity.TransactionEntity;
 import com.yjailbir.core.repository.TransactionChainRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
@@ -21,17 +27,29 @@ public class TransactionChainService {
                 .findByTransactionId(dto.transactionId())
                 .orElseGet(() -> {
                     TransactionChainEntity newChain = new TransactionChainEntity(dto.transactionId());
-                    // сразу сохраняем, чтобы можно было добавить шаги
                     return transactionChainRepository.save(newChain);
                 });
 
         TransactionEntity step = new TransactionEntity(dto, chain);
         chain.addStep(step);
-        TransactionChainEntity newChain = transactionChainRepository.save(chain);
-        System.out.println("added: " + newChain);
+        transactionChainRepository.save(chain);
 
         // Валидация (замокана)
 
-       messagingTemplate.convertAndSend("/topic/transactions", newChain.toDto());
+       //messagingTemplate.convertAndSend("/topic/transactions", newChain.toDto());
+    }
+
+    @Scheduled(fixedDelay = 100)
+    public void sendMock() {
+        int a = ThreadLocalRandom.current().nextInt();
+        TransactionStatus status;
+        if (a % 2 == 0) {
+            status  = TransactionStatus.FAILURE;
+        } else {
+            status  = TransactionStatus.SUCCESS;
+        }
+
+        ValidationResultDto dto = new ValidationResultDto(status, LocalDateTime.now());
+        messagingTemplate.convertAndSend("/topic/transactions", dto);
     }
 }
