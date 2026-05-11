@@ -14,7 +14,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         // Внешний брокер RabbitMQ с включённым STOMP-плагином
         registry.enableStompBrokerRelay("/topic")
-                .setRelayHost("localhost")
+                .setRelayHost("rabbitmq")
                 .setRelayPort(61613)
                 .setClientLogin("guest")
                 .setClientPasscode("guest")
