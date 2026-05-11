@@ -13,17 +13,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
 public class TransactionChainService {
+    private final ValidateService validateService;
     private final PaymentsRepository paymentsRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
 
     @Transactional
-    public void save(TransactionDtoFromBank dto) {
+    public void saveAndValidate(TransactionDtoFromBank dto) {
         PaymentEntity chain = paymentsRepository
                 .findByTransactionId(dto.paymentId())
                 .orElseGet(() -> {
@@ -34,11 +36,9 @@ public class TransactionChainService {
         TransactionEntity step = new TransactionEntity(dto, chain);
         chain.addStep(step);
         paymentsRepository.save(chain);
+        ValidationResultDto result = validateService.validate(step);
 
-        //todo добавить уникальный айди в каждую транзакцию первичным
-        // Валидация (замокана)
-
-        //messagingTemplate.convertAndSend("/topic/transactions", newChain.toDto());
+        messagingTemplate.convertAndSend("/topic/transactions", result);
     }
 
     @Scheduled(fixedDelay = 100)
@@ -51,7 +51,7 @@ public class TransactionChainService {
             status = TransactionStatus.SUCCESS;
         }
 
-        ValidationResultDto dto = new ValidationResultDto(status.getDescription(), LocalDateTime.now());
+        ValidationResultDto dto = new ValidationResultDto(status.getDescription(), LocalDateTime.now(), List.of());
         messagingTemplate.convertAndSend("/topic/transactions", dto);
         System.out.println("SEND MOCK");
     }

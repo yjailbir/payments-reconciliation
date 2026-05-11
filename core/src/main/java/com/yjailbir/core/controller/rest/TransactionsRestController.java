@@ -22,7 +22,7 @@ public class TransactionsRestController {
     @PostMapping("/add")
     public void add (@RequestBody List<TransactionDtoFromBank> list) {
         for (TransactionDtoFromBank dto : list) {
-            transactionChainService.save(dto);
+            transactionChainService.saveAndValidate(dto);
         }
     }
 }
