@@ -41,7 +41,7 @@ public class TransactionChainService {
         messagingTemplate.convertAndSend("/topic/transactions", result);
     }
 
-    @Scheduled(fixedDelay = 10000)
+    @Scheduled(fixedDelay = 15000)
     public void sendMock() {
         int a = ThreadLocalRandom.current().nextInt();
         TransactionStatus status;
