@@ -19,7 +19,8 @@ import java.util.concurrent.ThreadLocalRandom;
 @RequiredArgsConstructor
 public class TransactionChainService {
     private final TransactionChainRepository transactionChainRepository;
-   private final SimpMessagingTemplate messagingTemplate;
+    private final SimpMessagingTemplate messagingTemplate;
+
 
     @Transactional
     public void save(TransactionDtoFromBank dto) {
@@ -37,7 +38,7 @@ public class TransactionChainService {
         //todo добавить уникальный айди в каждую транзакцию первичным
         // Валидация (замокана)
 
-       //messagingTemplate.convertAndSend("/topic/transactions", newChain.toDto());
+        //messagingTemplate.convertAndSend("/topic/transactions", newChain.toDto());
     }
 
     @Scheduled(fixedDelay = 100)
@@ -45,12 +46,12 @@ public class TransactionChainService {
         int a = ThreadLocalRandom.current().nextInt();
         TransactionStatus status;
         if (a % 2 == 0) {
-            status  = TransactionStatus.FAILURE;
+            status = TransactionStatus.FAILURE;
         } else {
-            status  = TransactionStatus.SUCCESS;
+            status = TransactionStatus.SUCCESS;
         }
 
-        ValidationResultDto dto = new ValidationResultDto(status, LocalDateTime.now());
+        ValidationResultDto dto = new ValidationResultDto(status.getDescription(), LocalDateTime.now());
         messagingTemplate.convertAndSend("/topic/transactions", dto);
         System.out.println("SEND MOCK");
     }

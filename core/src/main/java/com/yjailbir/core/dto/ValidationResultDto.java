@@ -3,7 +3,7 @@ package com.yjailbir.core.dto;
 import java.time.LocalDateTime;
 
 public record ValidationResultDto(
-        TransactionStatus status,
+        String status,
         LocalDateTime time
 ) {
 }
