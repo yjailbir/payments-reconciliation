@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class TransactionChainService {
     private final TransactionChainRepository transactionChainRepository;
-    private final SimpMessagingTemplate messagingTemplate;
+   private final SimpMessagingTemplate messagingTemplate;
 
     @Transactional
     public void save(TransactionDto dto) {
@@ -28,9 +28,10 @@ public class TransactionChainService {
         TransactionEntity step = new TransactionEntity(dto, chain);
         chain.addStep(step);
         TransactionChainEntity newChain = transactionChainRepository.save(chain);
+        System.out.println("added: " + newChain);
 
         // Валидация (замокана)
 
-        messagingTemplate.convertAndSend("/topic/transactions", newChain);
+       messagingTemplate.convertAndSend("/topic/transactions", newChain);
     }
 }
