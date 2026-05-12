@@ -38,6 +38,8 @@ public class ValidateService {
                     result.addAll(validateInnerTransactionData(entity));
 
                     if (!result.isEmpty()) {
+                        entity.setStatus(TransactionStatus.FAILURE);
+                        entity.setErrorComments(String.join(", ", result));
                         failure = true;
                     }
                 } else {
@@ -54,18 +56,23 @@ public class ValidateService {
                     }
                 }
                 if (previousTransaction != null) {
-                    if (previousTransaction.getStatus().equals(TransactionStatus.FAILURE)) {
-                        warning = true;
-                        result.add("Требуется внимание. В одной из предыдущих транзакций обнаружена ошибка!");
-                    }
-
                     List<String> neighboringErrors = validateNeighboringTransactions(previousTransaction, entity);
                     List<String> innerErrors = validateInnerTransactionData(entity);
 
+
+                    if (previousTransaction.getStatus().equals(TransactionStatus.FAILURE)) {
+                        warning = true;
+                        neighboringErrors.add("Требуется внимание. В одной из предыдущих транзакций обнаружена ошибка!");
+                    }
+
                     if (!neighboringErrors.isEmpty()) {
+                        entity.setStatus(TransactionStatus.WARNING);
+                        entity.setErrorComments(String.join(", ", neighboringErrors));
                         warning = true;
                     }
                     if (!innerErrors.isEmpty()) {
+                        entity.setStatus(TransactionStatus.FAILURE);
+                        entity.setErrorComments(String.join(", ", innerErrors));
                         failure = true;
                     }
 

@@ -53,7 +53,7 @@ public class TransactionChainService {
 
         for (int i = 1; i <= failure; i++) {
             List<String> warnings = List.of("Warning text", "Another Warning text");
-            List<String> errors = List.of("Error text, Another Error text");
+            List<String> errors = List.of("Error text", "Another Error text");
             comments.add(new OneTransactionComment(
                     UUID.randomUUID(),
                     errors,

@@ -2,12 +2,11 @@ package com.yjailbir.core.controller.rest;
 
 import com.yjailbir.core.dto.TransactionDtoFromBank;
 import com.yjailbir.core.service.TransactionChainService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -25,4 +24,7 @@ public class TransactionsRestController {
             transactionChainService.saveAndValidate(dto);
         }
     }
+
+    @GetMapping("/payment")
+    public ResponseEntity<>
 }

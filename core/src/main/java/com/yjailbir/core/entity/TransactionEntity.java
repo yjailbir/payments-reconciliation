@@ -59,6 +59,10 @@ public class TransactionEntity {
     private Double multiplier;
     @Column(name = "not_counted_history")
     String notCountedHistory;
+    @Column(name = "warning_comments")
+    private String warningComments;
+    @Column(name = "error_comments")
+    private String errorComments;
 
     public TransactionEntity(TransactionDtoFromBank dto, PaymentEntity chain) {
         this.id = dto.transactionId();

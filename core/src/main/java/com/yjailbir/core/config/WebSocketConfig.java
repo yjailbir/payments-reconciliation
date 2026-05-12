@@ -19,7 +19,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setClientLogin("guest")
                 .setClientPasscode("guest")
                 .setSystemLogin("guest")
-                .setSystemPasscode("guest");
+                .setSystemPasscode("guest")
+                .setSystemHeartbeatSendInterval(4000)
+                .setSystemHeartbeatReceiveInterval(4000);
         // Префикс для сообщений от клиента (не используется)
         registry.setApplicationDestinationPrefixes("/app");
     }
