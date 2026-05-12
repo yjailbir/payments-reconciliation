@@ -91,7 +91,7 @@ public class MockBankService {
         }
 
         ValidationResultDto res1 = transactionChainService.saveAndValidate(dto1);
-        Thread.sleep(1000);
+        Thread.sleep(10);
         ValidationResultDto res2 = transactionChainService.saveAndValidate(dto2);
 
         OneTransactionComment comment1 = new OneTransactionComment(
