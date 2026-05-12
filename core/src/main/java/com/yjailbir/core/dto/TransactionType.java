@@ -9,7 +9,8 @@ public enum TransactionType {
     BY_PHONE_NUMBER("Перевод по номеру телефона"),
     BY_CARD_NUMBER("Перевод по номеру карты"),
     CASH("Снятие наличных"),
-    BIOMETRY("Оплата биометрией");
+    BIOMETRY("Оплата биометрией"),
+    BANK_THING("Межбанковское взаимодействие");
 
     private final String description;
 
