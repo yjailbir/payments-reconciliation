@@ -51,7 +51,7 @@ public class TransactionChainService {
         return transactionsRepository.findById(transactionId).get().toDto();
     }
 
-    @Scheduled(fixedDelay = 15000)
+    /*@Scheduled(fixedDelay = 15000)
     public void sendMock() {
         Integer success = ThreadLocalRandom.current().nextInt(0, 1000);
         Integer failure = ThreadLocalRandom.current().nextInt(0, 1000);
@@ -71,5 +71,5 @@ public class TransactionChainService {
 
         messagingTemplate.convertAndSend("/topic/transactions", new DtoForWebSocket(success, warning, failure, comments));
         System.out.println("SEND MOCK");
-    }
+    }*/
 }

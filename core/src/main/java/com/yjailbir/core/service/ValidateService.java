@@ -100,7 +100,7 @@ public class ValidateService {
 
         if (secondTransaction.getNotCountedHistory().isEmpty()) {
             if (!firstTransaction.getReceiver().equals(secondTransaction.getReceiver())) {
-                result.add("Требуется внимание! Не совпадают получатель и отправитель! Возможно предыдущая транзакция ещё не обработана.");
+                result.add("Требуется внимание! Не совпадают получатель и отправитель! Возможно предыдущая транзакция ещё не обработана");
             }
             if (!firstTransaction.getSumOut().equals(secondTransaction.getSumIn())) {
                 result.add(String.format(
