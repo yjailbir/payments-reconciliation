@@ -3,6 +3,7 @@ package com.yjailbir.core.service;
 import com.yjailbir.core.dto.DtoForFrontend;
 import com.yjailbir.core.dto.OneTransactionComment;
 import com.yjailbir.core.dto.TransactionDtoFromBank;
+import com.yjailbir.core.dto.ValidationResultDto;
 import com.yjailbir.core.entity.PaymentEntity;
 import com.yjailbir.core.entity.TransactionEntity;
 import com.yjailbir.core.repository.PaymentsRepository;
@@ -37,9 +38,9 @@ public class TransactionChainService {
         TransactionEntity step = new TransactionEntity(dto, chain);
         chain.addStep(step);
         paymentsRepository.save(chain);
-        //ValidationResultDto result = validateService.validate(step);
+        ValidationResultDto result = validateService.validate(step);
 
-       // messagingTemplate.convertAndSend("/topic/transactions", result);
+        messagingTemplate.convertAndSend("/topic/transactions", result);
     }
 
     @Scheduled(fixedDelay = 15000)

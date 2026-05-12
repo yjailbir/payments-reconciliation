@@ -22,12 +22,12 @@ public class ValidateService {
     private final PaymentsRepository paymentsRepository;
     private final TransactionsRepository transactionsRepository;
 
-    /*public ValidationResultDto validate(TransactionEntity entity) {
-        Optional<PaymentEntity> paymentEntity = paymentsRepository.findByTransactionId(entity.getPaymentId());
+    public ValidationResultDto validate(TransactionEntity entity) {
+        Optional<PaymentEntity> paymentEntity = paymentsRepository.findByPaymentId(entity.getPaymentId());
         boolean failure = false;
         boolean warning = false;
         if (paymentEntity.isPresent()) {
-            List<TransactionEntity> transactionEntities = transactionsRepository.findAllByTransactionIdOrderByTimestampDesc(entity.getPaymentId());
+            List<TransactionEntity> transactionEntities = transactionsRepository.findAllByPaymentIdOrderByTimestampDesc(entity.getPaymentId());
             List<String> result = new ArrayList<>();
             //Если в цепочке одна транзакция
             if (transactionEntities.size() == 1) {
@@ -37,7 +37,7 @@ public class ValidateService {
                     //Валидируем её
                     result.addAll(validateInnerTransactionData(entity));
 
-                    if(!result.isEmpty()){
+                    if (!result.isEmpty()) {
                         failure = true;
                     }
                 } else {
@@ -48,13 +48,13 @@ public class ValidateService {
                 //Транзакций несколько, надо проверять соседей
                 //Проверяем текущую и предыдущую
                 TransactionEntity previousTransaction = null;
-                for(int i = 0; i < transactionEntities.size(); i++) {
+                for (int i = 0; i < transactionEntities.size(); i++) {
                     if (transactionEntities.get(i).getId().equals(entity.getId())) {
                         previousTransaction = transactionEntities.get(i - 1);
                     }
                 }
                 if (previousTransaction != null) {
-                    if(previousTransaction.getStatus().equals(TransactionStatus.FAILURE)) {
+                    if (previousTransaction.getStatus().equals(TransactionStatus.FAILURE)) {
                         warning = true;
                         result.add("Требуется внимание. В одной из предыдущих транзакций обнаружена ошибка!");
                     }
@@ -62,38 +62,53 @@ public class ValidateService {
                     List<String> neighboringErrors = validateNeighboringTransactions(previousTransaction, entity);
                     List<String> innerErrors = validateInnerTransactionData(entity);
 
-                    result.addAll(validateNeighboringTransactions(previousTransaction, entity));
-                }
+                    if (!neighboringErrors.isEmpty()) {
+                        warning = true;
+                    }
+                    if (!innerErrors.isEmpty()) {
+                        failure = true;
+                    }
 
+                    result.addAll(neighboringErrors);
+                    result.addAll(innerErrors);
+                }
+            }
+
+            if (failure) {
+                return new ValidationResultDto(TransactionStatus.FAILURE.getDescription(), entity.getTimestamp(), result);
+            } else if (warning) {
+                return new ValidationResultDto(TransactionStatus.WARNING.getDescription(), entity.getTimestamp(), result);
+            } else {
+                return new ValidationResultDto(TransactionStatus.SUCCESS.getDescription(), entity.getTimestamp(), result);
             }
         } else {
             //Иначе такой транзакции нет (по идее эта ветка никогда не сработает)
             return new ValidationResultDto(TransactionStatus.NOT_FOUND.getDescription(), entity.getTimestamp(), List.of());
         }
-    }*/
+    }
 
     private List<String> validateNeighboringTransactions(TransactionEntity firstTransaction, TransactionEntity secondTransaction) {
         List<String> result = new ArrayList<>();
 
-        if(secondTransaction.getNotCountedHistory().isEmpty()) {
-             if(!firstTransaction.getReceiver().equals(secondTransaction.getReceiver())) {
-                 result.add("Требуется внимание! Не совпадают получатель и отправитель! Возможно предыдущая транзакция ещё не обработана.");
-             }
-             if(!firstTransaction.getSumOut().equals(secondTransaction.getSumIn())) {
-                 result.add(String.format(
-                         "Не совпадают отправленная и полученная суммы! Ожидаемая сумма: %s, полученная: %s",
-                         secondTransaction.getSumIn(),
-                         firstTransaction.getSumOut()
-                 ));
-             }
+        if (secondTransaction.getNotCountedHistory().isEmpty()) {
+            if (!firstTransaction.getReceiver().equals(secondTransaction.getReceiver())) {
+                result.add("Требуется внимание! Не совпадают получатель и отправитель! Возможно предыдущая транзакция ещё не обработана.");
+            }
+            if (!firstTransaction.getSumOut().equals(secondTransaction.getSumIn())) {
+                result.add(String.format(
+                        "Не совпадают отправленная и полученная суммы! Ожидаемая сумма: %s, полученная: %s",
+                        secondTransaction.getSumIn(),
+                        firstTransaction.getSumOut()
+                ));
+            }
         } else {
             BigDecimal expectedValue = BigDecimal.valueOf(firstTransaction.getSumOut(), 2);
             List<String> banks = List.of(secondTransaction.getNotCountedHistory().split(", "));
-            for(String bank : banks) {
+            for (String bank : banks) {
                 expectedValue = applyPercentOnly(expectedValue, getMockedPercent(bank), RoundingMode.HALF_EVEN);
             }
 
-            if(expectedValue.compareTo(BigDecimal.valueOf(secondTransaction.getSumIn(), 2)) != 0) {
+            if (expectedValue.compareTo(BigDecimal.valueOf(secondTransaction.getSumIn(), 2)) != 0) {
                 result.add(String.format(
                         "Требуется проверка! Предварительно не сходится значение суммы! После прохождения транзакций по банкам вне системы предварительно ожидалась сумма платежа %s, но получено: %s",
                         expectedValue,
