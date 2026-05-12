@@ -75,7 +75,7 @@ public class MockBankService {
         );
 
         transactionChainService.saveAndValidate(dto1);
-        Thread.currentThread().wait(1000L);
+        Thread.sleep(1000);
         transactionChainService.saveAndValidate(dto2);
     }
 }
