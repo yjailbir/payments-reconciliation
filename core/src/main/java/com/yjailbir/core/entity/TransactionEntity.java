@@ -68,25 +68,25 @@ public class TransactionEntity {
     private String errorComments;
 
     public TransactionEntity(TransactionDtoFromBank dto, PaymentEntity chain) {
-        this.id = dto.transactionId();
-        this.paymentId = dto.paymentId();
+        this.id = dto.getTransactionId();
+        this.paymentId = dto.getPaymentId();
         this.chain = chain;
         this.status = TransactionStatus.PENDING;
-        this.type = dto.transactionType();
-        this.sender = dto.from();
-        this.receiver = dto.to();
-        this.sumIn = dto.sumIn();
-        this.sumOut = dto.sumOut();
-        this.commissionValue = dto.commissionValue();
-        this.commissionPercents = dto.commissionPercents();
-        this.fixedCommission = dto.fixedCommission();
-        this.roundingMode = dto.roundingMode();
-        this.percentsFirst = dto.percentsFirst();
-        this.timestamp = dto.timestamp();
-        this.fromCurrency = dto.fromCurrency();
-        this.toCurrency = dto.toCurrency();
-        this.multiplier = dto.multiplier();
-        this.notCountedHistory = dto.notCountedHistory();
+        this.type = dto.getTransactionType();
+        this.sender = dto.getFrom();
+        this.receiver = dto.getTo();
+        this.sumIn = dto.getSumIn();
+        this.sumOut = dto.getSumOut();
+        this.commissionValue = dto.getCommissionValue();
+        this.commissionPercents = dto.getCommissionPercents();
+        this.fixedCommission = dto.getFixedCommission();
+        this.roundingMode = dto.getRoundingMode();
+        this.percentsFirst = dto.getPercentsFirst();
+        this.timestamp = dto.getTimestamp();
+        this.fromCurrency = dto.getFromCurrency();
+        this.toCurrency = dto.getToCurrency();
+        this.multiplier = dto.getMultiplier();
+        this.notCountedHistory = dto.getNotCountedHistory();
         this.warningComments = "";
         this.errorComments = "";
     }
