@@ -63,8 +63,9 @@ public class ValidateService {
                     List<String> innerErrors = validateInnerTransactionData(entity);
 
 
-                    if (previousTransaction.getStatus().equals(TransactionStatus.FAILURE)) {
+                    if (previousTransaction.getStatus().equals(TransactionStatus.FAILURE) || previousTransaction.getHasErrorInChain()) {
                         warning = true;
+                        entity.setHasErrorInChain(true);
                         neighboringErrors.add("Требуется внимание. В одной из предыдущих транзакций обнаружена ошибка!");
                     }
 

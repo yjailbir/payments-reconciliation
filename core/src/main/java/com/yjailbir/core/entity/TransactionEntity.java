@@ -66,6 +66,8 @@ public class TransactionEntity {
     private String warningComments;
     @Column(name = "error_comments", columnDefinition = "TEXT")
     private String errorComments;
+    @Column(name = "has_error")
+    private Boolean hasErrorInChain;
 
     public TransactionEntity(TransactionDtoFromBank dto, PaymentEntity chain) {
         this.id = dto.getTransactionId();
@@ -89,6 +91,7 @@ public class TransactionEntity {
         this.notCountedHistory = dto.getNotCountedHistory();
         this.warningComments = "";
         this.errorComments = "";
+        hasErrorInChain = false;
     }
 
     public TransactionDtoForFrontend toDto() {
