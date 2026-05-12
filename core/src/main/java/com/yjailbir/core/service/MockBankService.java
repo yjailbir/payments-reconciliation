@@ -77,11 +77,6 @@ public class MockBankService {
                 failureCount++;
                 successCount--;
             }
-            if (a == 6) {
-                dto3.setSumOut(230000L);
-                successCount--;
-                failureCount++;
-            }
             if (a == 8) {
                 dto1.setCommissionPercents(4);
                 failureCount++;
