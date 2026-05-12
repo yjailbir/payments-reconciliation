@@ -1,6 +1,6 @@
 package com.yjailbir.core.service;
 
-import com.yjailbir.core.dto.DtoForFrontend;
+import com.yjailbir.core.dto.DtoForWebSocket;
 import com.yjailbir.core.dto.OneTransactionComment;
 import com.yjailbir.core.dto.TransactionDtoFromBank;
 import com.yjailbir.core.dto.ValidationResultDto;
@@ -61,7 +61,7 @@ public class TransactionChainService {
             ));
         }
 
-        messagingTemplate.convertAndSend("/topic/transactions", new DtoForFrontend(success, warning, failure, comments));
+        messagingTemplate.convertAndSend("/topic/transactions", new DtoForWebSocket(success, warning, failure, comments));
         System.out.println("SEND MOCK");
     }
 }

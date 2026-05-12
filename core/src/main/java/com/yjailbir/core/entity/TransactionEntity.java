@@ -1,6 +1,6 @@
 package com.yjailbir.core.entity;
 
-import com.yjailbir.core.dto.TransactionEntityDto;
+import com.yjailbir.core.dto.TransactionDtoForFrontend;
 import com.yjailbir.core.dto.TransactionDtoFromBank;
 import com.yjailbir.core.dto.TransactionStatus;
 import com.yjailbir.core.dto.TransactionType;
@@ -9,7 +9,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -86,9 +89,11 @@ public class TransactionEntity {
         this.notCountedHistory = dto.notCountedHistory();
     }
 
-    public TransactionEntityDto toDto() {
-        return new TransactionEntityDto(
-                this.status,
+    public TransactionDtoForFrontend toDto() {
+        return new TransactionDtoForFrontend(
+                this.id,
+                this.status.getDescription(),
+                this.type.getDescription(),
                 this.sender,
                 this.receiver,
                 this.sumIn,
@@ -96,7 +101,12 @@ public class TransactionEntity {
                 this.commissionValue,
                 this.commissionPercents,
                 this.fixedCommission,
-                this.timestamp
+                this.timestamp,
+                this.fromCurrency,
+                this.toCurrency,
+                BigDecimal.valueOf(this.multiplier).setScale(4, RoundingMode.valueOf(this.roundingMode)).toString(),
+                List.of(this.warningComments.split(", ")),
+                List.of(this.errorComments.split(", "))
         );
     }
 }

@@ -1,5 +1,7 @@
 package com.yjailbir.core.entity;
 
+import com.yjailbir.core.dto.PaymentDtoForFrontend;
+import com.yjailbir.core.dto.TransactionStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,10 +29,6 @@ public class PaymentEntity {
     private LocalDateTime lastUpdated;
     @OneToMany(mappedBy = "chain", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TransactionEntity> steps = new ArrayList<>();
-    @Column(name = "start_sum")
-    private Long startSum;
-    @Column(name = "last_sum")
-    private Long lastSum;
 
     public PaymentEntity(UUID paymentId) {
         this.paymentId = paymentId;
@@ -41,6 +39,27 @@ public class PaymentEntity {
     public void addStep(TransactionEntity step) {
         steps.add(step);
         step.setChain(this);
-        this.lastUpdated = LocalDateTime.now();
+        if (step.getTimestamp().isAfter(this.lastUpdated)) {
+            this.lastUpdated = step.getTimestamp();
+        }
+    }
+
+    public PaymentDtoForFrontend toDto() {
+        TransactionStatus status = TransactionStatus.SUCCESS;
+
+        for (TransactionEntity step : steps) {
+            if (step.getStatus() == TransactionStatus.WARNING) {
+                status = TransactionStatus.WARNING;
+                continue;
+            }
+            if (step.getStatus() == TransactionStatus.FAILURE) {
+                status = TransactionStatus.FAILURE;
+                break;
+            }
+
+            return new PaymentDtoForFrontend(paymentId, status.getDescription(), created, lastUpdated);
+        }
+
+        return new PaymentDtoForFrontend(paymentId, status.getDescription(), created, lastUpdated);
     }
 }

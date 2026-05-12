@@ -25,6 +25,5 @@ public class TransactionsRestController {
         }
     }
 
-    @GetMapping("/payment")
-    public ResponseEntity<>
+
 }

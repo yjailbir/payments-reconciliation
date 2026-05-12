@@ -2,7 +2,7 @@ package com.yjailbir.core.dto;
 
 import java.util.List;
 
-public record DtoForFrontend(
+public record DtoForWebSocket(
         Integer success,
         Integer warning,
         Integer failure,
