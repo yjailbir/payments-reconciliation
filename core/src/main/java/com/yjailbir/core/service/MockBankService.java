@@ -60,7 +60,7 @@ public class MockBankService {
             int failureCount = 0;
             int warningCount = 0;
 
-            if (a == 4) {
+            if (a == 4 || a == 1 || a == 2) {
                 dto2.setSumOut(22000L);
                 failureCount++;
                 successCount--;
