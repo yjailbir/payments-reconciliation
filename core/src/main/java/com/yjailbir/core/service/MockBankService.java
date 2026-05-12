@@ -60,36 +60,21 @@ public class MockBankService {
             int failureCount = 0;
             int warningCount = 0;
 
-            if (a == 4 || a == 1 || a == 2) {
-                dto2.setSumOut(22000L);
-                failureCount++;
-                successCount--;
-            }
-            if (a == 6) {
-                dto3.setSumOut(230000L);
-                successCount--;
-                failureCount++;
-            }
-            if (a == 8) {
-                dto1.setCommissionPercents(4);
-                failureCount++;
-                successCount--;
-            }
-            if (a == 7) {
-                dto2.setSumOut(12000L);
-                failureCount++;
-                successCount--;
-                dto3.setSumOut(230000L);
-                successCount--;
-                failureCount++;
-            }
-            if (a == 10) {
-                List<String> banksCopy = new ArrayList<>(BANKS);
-                Collections.shuffle(banksCopy);
-                dto2.setFrom(banksCopy.get(0));
-                warningCount++;
-                successCount--;
-            }
+           if (a == 1 || a == 2) {
+               dto2.setSumOut(243000L);
+               failureCount++;
+               successCount--;
+           }
+           if (a == 4) {
+               dto3.setSumOut(240000L);
+               failureCount++;
+               successCount--;
+           }
+           if (a == 6) {
+               dto3.setSumOut(240000L);
+               failureCount++;
+               successCount--;
+           }
 
             ValidationResultDto res1 = transactionChainService.saveAndValidate(dto1);
             ValidationResultDto res2 = transactionChainService.saveAndValidate(dto2);
