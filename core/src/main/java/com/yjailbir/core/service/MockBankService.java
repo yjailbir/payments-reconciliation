@@ -36,7 +36,7 @@ public class MockBankService {
                     paymentUUID, UUID.randomUUID(),
                     shuffledTypes.get(0), shuffledBanks.get(0), shuffledBanks.get(1),
                     250000L, 245000L, 5000L, 2, 0, "HALF_UP", true,
-                    LocalDateTime.now(), "UZS", "UZS", 1D, "");
+                    LocalDateTime.now().minusSeconds(132), "UZS", "UZS", 1D, "");
 
             Collections.shuffle(shuffledTypes);
             Collections.shuffle(shuffledBanks);
@@ -45,9 +45,30 @@ public class MockBankService {
                     paymentUUID, UUID.randomUUID(),
                     shuffledTypes.get(0), dto1.getTo(), shuffledBanks.get(0),
                     245000L, 240000L, 5000L, 0, 5000, "HALF_UP", true,
-                    LocalDateTime.now().plusSeconds(123), "UZS", "UZS", 1D, "");
+                    dto1.getTimestamp().plusSeconds(312), "UZS", "UZS", 1D, "");
 
-            int successCount = 2;
+            Collections.shuffle(shuffledTypes);
+            Collections.shuffle(shuffledBanks);
+
+            TransactionDtoFromBank dto3 = new TransactionDtoFromBank(
+                    paymentUUID, UUID.randomUUID(),
+                    shuffledTypes.get(0), dto2.getTo(), shuffledBanks.get(0),
+                    240000L, 227000L, 1000L, 5, 5000, "HALF_UP", true,
+                    dto2.getTimestamp().plusSeconds(46), "UZS", "UZS", 1D, "");
+
+
+            boolean useDto3 = true;
+
+            if (List.of(3,7,9).contains(a)) {
+                useDto3 = false;
+            }
+
+            int successCount;
+            if (useDto3) {
+                successCount = 3;
+            } else {
+                successCount = 2;
+            }
             int failureCount = 0;
             int warningCount = 0;
 
@@ -55,6 +76,11 @@ public class MockBankService {
                 dto2.setSumOut(22000L);
                 failureCount++;
                 successCount--;
+            }
+            if (a == 6) {
+                dto3.setSumOut(230000L);
+                successCount--;
+                failureCount++;
             }
             if (a == 8) {
                 dto1.setCommissionPercents(4);
@@ -71,14 +97,31 @@ public class MockBankService {
 
             ValidationResultDto res1 = transactionChainService.saveAndValidate(dto1);
             ValidationResultDto res2 = transactionChainService.saveAndValidate(dto2);
+            ValidationResultDto res3 = null;
+            if (useDto3) {
+                res3 = transactionChainService.saveAndValidate(dto3);
+            }
 
             OneTransactionComment comment1 = new OneTransactionComment(
                     dto1.getTransactionId(), res1.errors(), res1.warnings());
             OneTransactionComment comment2 = new OneTransactionComment(
                     dto2.getTransactionId(), res2.errors(), res2.warnings());
+            OneTransactionComment comment3 = null;
+            if (useDto3) {
+                comment3 = new OneTransactionComment(
+                        dto3.getTransactionId(), res3.errors(), res3.warnings()
+                );
+            }
 
-            DtoForWebSocket payload = new DtoForWebSocket(successCount, warningCount, failureCount,
-                    List.of(comment1, comment2));
+            DtoForWebSocket payload;
+            if (useDto3) {
+                payload = new DtoForWebSocket(successCount, warningCount, failureCount,
+                        List.of(comment1, comment2, comment3));
+            } else {
+                payload = new DtoForWebSocket(successCount, warningCount, failureCount,
+                        List.of(comment1, comment2));
+            }
+
 
             // Отправляем неблокирующе – если RabbitMQ притормозит, планировщик не встанет
             CompletableFuture.runAsync(() -> messagingTemplate.convertAndSend("/topic/transactions", payload));
