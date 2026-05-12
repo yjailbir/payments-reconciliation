@@ -28,24 +28,25 @@ public class ValidateService {
         boolean warning = false;
         if (paymentEntity.isPresent()) {
             List<TransactionEntity> transactionEntities = transactionsRepository.findAllByPaymentIdOrderByTimestampDesc(entity.getPaymentId());
-            List<String> result = new ArrayList<>();
+            List<String> errors = new ArrayList<>();
+            List<String> warnings = new ArrayList<>();
             //Если в цепочке одна транзакция
             if (transactionEntities.size() == 1) {
                 TransactionEntity transactionEntity = transactionEntities.getFirst();
                 //Если это проверямая транзакция
                 if (transactionEntity.getPaymentId().equals(entity.getPaymentId()) && transactionEntity.getStatus().equals(TransactionStatus.PENDING)) {
                     //Валидируем её
-                    result.addAll(validateInnerTransactionData(entity));
+                    errors.addAll(validateInnerTransactionData(entity));
 
-                    if (!result.isEmpty()) {
+                    if (!errors.isEmpty()) {
                         entity.setStatus(TransactionStatus.FAILURE);
-                        entity.setErrorComments(String.join(", ", result));
+                        entity.setErrorComments(String.join(", ", errors));
                         failure = true;
                     }
                 } else {
                     failure = true;
                     entity.setStatus(TransactionStatus.FAILURE);
-                    result.add("Дубликат транзакции!");
+                    errors.add("Дубликат транзакции!");
                 }
             } else {
                 //Транзакций несколько, надо проверять соседей
@@ -80,27 +81,27 @@ public class ValidateService {
                         failure = true;
                     }
 
-                    result.addAll(neighboringErrors);
-                    result.addAll(innerErrors);
+                    warnings.addAll(neighboringErrors);
+                    errors.addAll(innerErrors);
                 }
             }
 
             if (failure) {
                 entity.setStatus(TransactionStatus.FAILURE);
                 transactionsRepository.save(entity);
-                return new ValidationResultDto(TransactionStatus.FAILURE.getDescription(), entity.getTimestamp(), result);
+                return new ValidationResultDto(TransactionStatus.FAILURE.getDescription(), entity.getTimestamp(), warnings, errors);
             } else if (warning) {
                 entity.setStatus(TransactionStatus.WARNING);
                 transactionsRepository.save(entity);
-                return new ValidationResultDto(TransactionStatus.WARNING.getDescription(), entity.getTimestamp(), result);
+                return new ValidationResultDto(TransactionStatus.WARNING.getDescription(), entity.getTimestamp(), warnings, errors);
             } else {
                 entity.setStatus(TransactionStatus.SUCCESS);
                 transactionsRepository.save(entity);
-                return new ValidationResultDto(TransactionStatus.SUCCESS.getDescription(), entity.getTimestamp(), result);
+                return new ValidationResultDto(TransactionStatus.SUCCESS.getDescription(), entity.getTimestamp(), warnings, errors);
             }
         } else {
             //Иначе такой транзакции нет (по идее эта ветка никогда не сработает)
-            return new ValidationResultDto(TransactionStatus.NOT_FOUND.getDescription(), entity.getTimestamp(), List.of());
+            return new ValidationResultDto(TransactionStatus.NOT_FOUND.getDescription(), entity.getTimestamp(), List.of(), List.of());
         }
     }
 

@@ -1,9 +1,8 @@
 package com.yjailbir.core.service;
 
-import com.yjailbir.core.dto.TransactionDtoFromBank;
-import com.yjailbir.core.dto.TransactionType;
-import com.yjailbir.core.dto.ValidationResultDto;
+import com.yjailbir.core.dto.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -15,18 +14,13 @@ import java.util.concurrent.ThreadLocalRandom;
 @RequiredArgsConstructor
 public class MockBankService {
     private final TransactionChainService transactionChainService;
+    private final SimpMessagingTemplate messagingTemplate;
     List<TransactionType> types =  new ArrayList<>(List.of(TransactionType.values()));
     List<String> banks = new ArrayList<>(List.of("Asakabank", "InFinBank", " Ipak Yuli Bank", "Hamkorbank"));
 
     @Scheduled(fixedRate = 1000)
     private void generateDto() throws InterruptedException {
         Integer a = ThreadLocalRandom.current().nextInt(0, 11);
-        boolean isRight;
-        if (a == 6 || a == 7 || a == 8) {
-            isRight = true;
-        } else {
-            isRight = false;
-        }
 
         UUID paymentUUID = UUID.randomUUID();
         Collections.shuffle(types);
@@ -59,7 +53,7 @@ public class MockBankService {
                 paymentUUID,
                 UUID.randomUUID(),
                 types.getFirst(),
-                dto1.to(),
+                dto1.getTo(),
                 banks.getFirst(),
                 245000L,
                 240000L,
@@ -75,8 +69,42 @@ public class MockBankService {
                 ""
         );
 
-        ValidationResultDto res1= transactionChainService.saveAndValidate(dto1);
+        Integer successCount = 2;
+        Integer failureCount = 0;
+        Integer warningCount = 0;
+
+        if (a == 4) {
+            dto2.setSumOut(22000L);
+            failureCount++;
+            successCount--;
+        }
+        if (a == 8) {
+            dto1.setCommissionPercents(4);
+            failureCount++;
+            successCount--;
+        }
+        if (a == 10) {
+            Collections.shuffle(banks);
+            dto2.setFrom(banks.getFirst());
+            warningCount++;
+            successCount--;
+        }
+
+        ValidationResultDto res1 = transactionChainService.saveAndValidate(dto1);
         Thread.sleep(1000);
-        transactionChainService.saveAndValidate(dto2);
+        ValidationResultDto res2 = transactionChainService.saveAndValidate(dto2);
+
+        OneTransactionComment comment1 = new OneTransactionComment(
+                dto1.getTransactionId(),
+                res1.errors(),
+                res1.warnings()
+        );
+        OneTransactionComment comment2 = new OneTransactionComment(
+                dto2.getTransactionId(),
+                res2.errors(),
+                res2.warnings()
+        );
+
+        messagingTemplate.convertAndSend("/topic/transactions", new DtoForWebSocket(successCount, warningCount, failureCount, List.of(comment1, comment2)));
     }
 }

@@ -6,6 +6,7 @@ import java.util.List;
 public record ValidationResultDto(
         String status,
         LocalDateTime time,
-        List<String> comments
+        List<String> warnings,
+        List<String> errors
 ) {
 }
