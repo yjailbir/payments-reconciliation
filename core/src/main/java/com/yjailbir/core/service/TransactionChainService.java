@@ -38,6 +38,19 @@ public class TransactionChainService {
         return validateService.validate(step);
     }
 
+    private void save(TransactionDtoFromBank dto) {
+        PaymentEntity chain = paymentsRepository
+                .findByPaymentId(dto.getPaymentId())
+                .orElseGet(() -> {
+                    PaymentEntity newChain = new PaymentEntity(dto.getPaymentId());
+                    return paymentsRepository.save(newChain);
+                });
+
+        TransactionEntity step = new TransactionEntity(dto, chain);
+        chain.addStep(step);
+        paymentsRepository.save(chain);
+    }
+
     public List<PaymentDtoForFrontend> getAllPayments() {
         return paymentsRepository.findTop1000O().stream().map(PaymentEntity::toDto).toList();
     }
@@ -51,7 +64,7 @@ public class TransactionChainService {
     }
 
     public List<TransactionDtoForFrontend> getAllTransactionsByPaymentId(UUID paymentId) {
-       return paymentsRepository.findByPaymentId(paymentId).get().getSteps().stream().map(TransactionEntity::toDto).toList();
+       return transactionsRepository.findAllByPaymentIdOrderByTimestampAsc(paymentId).stream().map(TransactionEntity::toDto).toList();
     }
 
     /*@Scheduled(fixedDelay = 15000)

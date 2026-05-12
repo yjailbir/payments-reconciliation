@@ -2,6 +2,7 @@ package com.yjailbir.core.service;
 
 import com.yjailbir.core.dto.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
+@Scope("prototype")
 public class MockBankService {
     private final TransactionChainService transactionChainService;
     private final SimpMessagingTemplate messagingTemplate;
