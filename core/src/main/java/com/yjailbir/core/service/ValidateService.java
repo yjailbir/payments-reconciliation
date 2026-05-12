@@ -53,7 +53,10 @@ public class ValidateService {
                 TransactionEntity previousTransaction = null;
                 for (int i = 0; i < transactionEntities.size(); i++) {
                     if (transactionEntities.get(i).getId().equals(entity.getId())) {
-                        previousTransaction = transactionEntities.get(i - 1);
+                        if (i > 0) {
+                            previousTransaction = transactionEntities.get(i - 1);
+                        }
+                        break;  // выходим из цикла, как только нашли
                     }
                 }
                 if (previousTransaction != null) {
