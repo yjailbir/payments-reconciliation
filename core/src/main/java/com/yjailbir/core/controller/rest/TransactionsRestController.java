@@ -34,8 +34,8 @@ public class TransactionsRestController {
     }
 
     @GetMapping("/transactions")
-    public ResponseEntity<List<TransactionDtoForFrontend>> getTransactions(){
-        return ResponseEntity.ok().body(transactionChainService.getAllTransactions());
+    public ResponseEntity<List<TransactionDtoForFrontend>> getTransactions(@RequestParam UUID paymentId){
+        return ResponseEntity.ok().body(transactionChainService.getAllTransactionsByPaymentId(paymentId));
     }
 
 

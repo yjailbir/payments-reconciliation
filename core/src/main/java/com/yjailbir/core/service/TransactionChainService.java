@@ -53,8 +53,8 @@ public class TransactionChainService {
         return transactionsRepository.findById(transactionId).get().toDto();
     }
 
-    public List<TransactionDtoForFrontend> getAllTransactions() {
-        return transactionsRepository.findAll().stream().map(TransactionEntity::toDto).toList();
+    public List<TransactionDtoForFrontend> getAllTransactionsByPaymentId(UUID paymentId) {
+       return paymentsRepository.findByPaymentId(paymentId).get().getSteps().stream().map(TransactionEntity::toDto).toList();
     }
 
     /*@Scheduled(fixedDelay = 15000)
