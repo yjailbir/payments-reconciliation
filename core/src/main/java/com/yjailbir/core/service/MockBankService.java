@@ -53,7 +53,7 @@ public class MockBankService {
             TransactionDtoFromBank dto3 = new TransactionDtoFromBank(
                     paymentUUID, UUID.randomUUID(),
                     shuffledTypes.get(0), dto2.getTo(), shuffledBanks.get(0),
-                    240000L, 227000L, 1000L, 5, 5000, "HALF_UP", true,
+                    240000L, 223000L, 17000L, 5, 5000, "HALF_UP", true,
                     dto2.getTimestamp().plusSeconds(46), "UZS", "UZS", 1D, "");
 
 
@@ -76,6 +76,11 @@ public class MockBankService {
                 dto2.setSumOut(22000L);
                 failureCount++;
                 successCount--;
+            }
+            if (a == 6) {
+                dto3.setSumOut(230000L);
+                successCount--;
+                failureCount++;
             }
             if (a == 8) {
                 dto1.setCommissionPercents(4);
