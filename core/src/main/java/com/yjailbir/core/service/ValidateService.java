@@ -14,6 +14,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
@@ -21,34 +22,95 @@ public class ValidateService {
     private final PaymentsRepository paymentsRepository;
     private final TransactionsRepository transactionsRepository;
 
-    public ValidationResultDto validate(TransactionEntity entity) {
-        Optional<PaymentEntity> paymentEntity = paymentsRepository.findByTransactionId(entity.getTransactionId());
+    /*public ValidationResultDto validate(TransactionEntity entity) {
+        Optional<PaymentEntity> paymentEntity = paymentsRepository.findByTransactionId(entity.getPaymentId());
+        boolean failure = false;
+        boolean warning = false;
         if (paymentEntity.isPresent()) {
-            List<TransactionEntity> transactionEntities = transactionsRepository.findAllByTransactionIdOrderByTimestampDesc(entity.getTransactionId());
+            List<TransactionEntity> transactionEntities = transactionsRepository.findAllByTransactionIdOrderByTimestampDesc(entity.getPaymentId());
+            List<String> result = new ArrayList<>();
             //Если в цепочке одна транзакция
             if (transactionEntities.size() == 1) {
                 TransactionEntity transactionEntity = transactionEntities.getFirst();
                 //Если это проверямая транзакция
-                if (transactionEntity.getTransactionId().equals(entity.getTransactionId())) {
+                if (transactionEntity.getPaymentId().equals(entity.getPaymentId())) {
                     //Валидируем её
-                    ValidationResultDto result = validateInnerTransactionData(entity);
-                    if (result.comments().isEmpty()) {
-                        transactionEntity.setStatus(TransactionStatus.SUCCESS);
-                    } else {
-                        transactionEntity.setStatus(TransactionStatus.FAILURE);
+                    result.addAll(validateInnerTransactionData(entity));
+
+                    if(!result.isEmpty()){
+                        failure = true;
+                    }
+                } else {
+                    //Иначе такой транзакции нет (по идее эта ветка никогда не сработает)
+                    return new ValidationResultDto(TransactionStatus.NOT_FOUND.getDescription(), entity.getTimestamp(), List.of());
+                }
+            } else {
+                //Транзакций несколько, надо проверять соседей
+                //Проверяем текущую и предыдущую
+                TransactionEntity previousTransaction = null;
+                for(int i = 0; i < transactionEntities.size(); i++) {
+                    if (transactionEntities.get(i).getId().equals(entity.getId())) {
+                        previousTransaction = transactionEntities.get(i - 1);
                     }
                 }
+                if (previousTransaction != null) {
+                    if(previousTransaction.getStatus().equals(TransactionStatus.FAILURE)) {
+                        warning = true;
+                        result.add("Требуется внимание. В одной из предыдущих транзакций обнаружена ошибка!");
+                    }
+
+                    List<String> neighboringErrors = validateNeighboringTransactions(previousTransaction, entity);
+                    List<String> innerErrors = validateInnerTransactionData(entity);
+
+                    result.addAll(validateNeighboringTransactions(previousTransaction, entity));
+                }
+
             }
         } else {
+            //Иначе такой транзакции нет (по идее эта ветка никогда не сработает)
             return new ValidationResultDto(TransactionStatus.NOT_FOUND.getDescription(), entity.getTimestamp(), List.of());
         }
+    }*/
 
-        return null;
+    private List<String> validateNeighboringTransactions(TransactionEntity firstTransaction, TransactionEntity secondTransaction) {
+        List<String> result = new ArrayList<>();
+
+        if(secondTransaction.getNotCountedHistory().isEmpty()) {
+             if(!firstTransaction.getReceiver().equals(secondTransaction.getReceiver())) {
+                 result.add("Требуется внимание! Не совпадают получатель и отправитель! Возможно предыдущая транзакция ещё не обработана.");
+             }
+             if(!firstTransaction.getSumOut().equals(secondTransaction.getSumIn())) {
+                 result.add(String.format(
+                         "Не совпадают отправленная и полученная суммы! Ожидаемая сумма: %s, полученная: %s",
+                         secondTransaction.getSumIn(),
+                         firstTransaction.getSumOut()
+                 ));
+             }
+        } else {
+            BigDecimal expectedValue = BigDecimal.valueOf(firstTransaction.getSumOut(), 2);
+            List<String> banks = List.of(secondTransaction.getNotCountedHistory().split(", "));
+            for(String bank : banks) {
+                expectedValue = applyPercentOnly(expectedValue, getMockedPercent(bank), RoundingMode.HALF_EVEN);
+            }
+
+            if(expectedValue.compareTo(BigDecimal.valueOf(secondTransaction.getSumIn(), 2)) != 0) {
+                result.add(String.format(
+                        "Требуется проверка! Предварительно не сходится значение суммы! После прохождения транзакций по банкам вне системы предварительно ожидалась сумма платежа %s, но получено: %s",
+                        expectedValue,
+                        secondTransaction.getSumIn()
+                ));
+            }
+        }
+
+        return result;
     }
 
-    private ValidationResultDto validateInnerTransactionData(TransactionEntity entity) {
+    private Integer getMockedPercent(String bankName) {
+        return ThreadLocalRandom.current().nextInt(1, 21);
+    }
+
+    private List<String> validateInnerTransactionData(TransactionEntity entity) {
         List<String> comments = new ArrayList<>();
-        boolean isOk = true;
 
         // 1. Извлечение основных полей
         Long sumInObj = entity.getSumIn();
@@ -65,7 +127,6 @@ public class ValidateService {
         // Критические поля
         if (sumInObj == null || sumOutObj == null) {
             comments.add("Сумма входа/выхода не задана");
-            isOk = false;
         }
 
         long sumInL = sumInObj;
@@ -77,20 +138,17 @@ public class ValidateService {
 
         if (sumInL < 0 || sumOutL < 0 || perc < 0 || fixed < 0 || statedComm < 0) {
             comments.add("Обнаружены отрицательные значения сумм/комиссий");
-            isOk = false;
         }
 
         // 2. Режим округления (общий и для конвертации, и для комиссий)
         RoundingMode rm = null;
         if (roundingModeStr == null || roundingModeStr.isBlank()) {
             comments.add("Не указан режим округления");
-            isOk = false;
         }
         try {
             rm = RoundingMode.valueOf(roundingModeStr);
         } catch (IllegalArgumentException e) {
             comments.add("Некорректный режим округления: " + roundingModeStr);
-            isOk = false;
         }
 
         final int SCALE = 2;
@@ -105,7 +163,6 @@ public class ValidateService {
 
         if (conversionNeeded && (multiplier == null || multiplier <= 0.0f)) {
             comments.add("Некорректный множитель конверсии для разных валют: " + multiplier);
-            isOk = false;
         }
 
         // Базовая сумма, от которой будут считаться комиссии
@@ -127,7 +184,6 @@ public class ValidateService {
                     expectedSumOut.toPlainString(),
                     conversionNeeded ? toCurrency : fromCurrency,
                     sumOut.toPlainString()));
-            isOk = false;
         }
 
         // 6. Проверка заявленной комиссии
@@ -139,15 +195,8 @@ public class ValidateService {
                     actualCommission.toPlainString(),
                     conversionNeeded ? toCurrency : fromCurrency,
                     statedCommission.toPlainString()));
-            isOk = false;
         }
-        if (isOk) {
-            return new ValidationResultDto(TransactionStatus.SUCCESS.getDescription(),
-                    entity.getTimestamp(), comments);
-        } else {
-            return new ValidationResultDto(TransactionStatus.FAILURE.getDescription(),
-                    entity.getTimestamp(), comments);
-        }
+        return comments;
     }
 
 // ------------------- Хелперы -------------------

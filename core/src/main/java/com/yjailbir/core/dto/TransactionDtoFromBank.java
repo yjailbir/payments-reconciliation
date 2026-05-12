@@ -1,6 +1,7 @@
 package com.yjailbir.core.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public record TransactionDtoFromBank(
@@ -19,6 +20,7 @@ public record TransactionDtoFromBank(
         LocalDateTime timestamp,
         String fromCurrency,
         String toCurrency,
-        Double multiplier
+        Double multiplier,
+        String notCountedHistory
 ) {
 }

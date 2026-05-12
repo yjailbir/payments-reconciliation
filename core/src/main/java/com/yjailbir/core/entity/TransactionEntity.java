@@ -3,6 +3,7 @@ package com.yjailbir.core.entity;
 import com.yjailbir.core.dto.TransactionEntityDto;
 import com.yjailbir.core.dto.TransactionDtoFromBank;
 import com.yjailbir.core.dto.TransactionStatus;
+import com.yjailbir.core.dto.TransactionType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,14 +20,17 @@ import java.util.UUID;
 public class TransactionEntity {
     @Id
     private UUID id;
-    @Column(name = "transaction_id")
-    private UUID transactionId;
+    @Column(name = "payment_id")
+    private UUID paymentId;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chain_id")
     private PaymentEntity chain;
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private TransactionStatus status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type")
+    private TransactionType type;
     @Column(name = "sender")
     private String sender;
     @Column(name = "receiver")
@@ -53,12 +57,15 @@ public class TransactionEntity {
     private String toCurrency;
     @Column(name = "course")
     private Double multiplier;
+    @Column(name = "not_counted_history")
+    String notCountedHistory;
 
     public TransactionEntity(TransactionDtoFromBank dto, PaymentEntity chain) {
-        this.id = dto.paymentId();
-        this.transactionId = dto.paymentId();
+        this.id = dto.transactionId();
+        this.paymentId = dto.paymentId();
         this.chain = chain;
         this.status = TransactionStatus.PENDING;
+        this.type = dto.transactionType();
         this.sender = dto.from();
         this.receiver = dto.to();
         this.sumIn = dto.sumIn();
@@ -72,6 +79,7 @@ public class TransactionEntity {
         this.fromCurrency = dto.fromCurrency();
         this.toCurrency = dto.toCurrency();
         this.multiplier = dto.multiplier();
+        this.notCountedHistory = dto.notCountedHistory();
     }
 
     public TransactionEntityDto toDto() {

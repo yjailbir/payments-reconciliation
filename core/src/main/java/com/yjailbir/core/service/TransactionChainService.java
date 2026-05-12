@@ -1,5 +1,6 @@
 package com.yjailbir.core.service;
 
+import com.yjailbir.core.dto.DtoForFrontend;
 import com.yjailbir.core.dto.TransactionDtoFromBank;
 import com.yjailbir.core.dto.TransactionStatus;
 import com.yjailbir.core.dto.ValidationResultDto;
@@ -36,23 +37,14 @@ public class TransactionChainService {
         TransactionEntity step = new TransactionEntity(dto, chain);
         chain.addStep(step);
         paymentsRepository.save(chain);
-        ValidationResultDto result = validateService.validate(step);
+        //ValidationResultDto result = validateService.validate(step);
 
-        messagingTemplate.convertAndSend("/topic/transactions", result);
+       // messagingTemplate.convertAndSend("/topic/transactions", result);
     }
 
     @Scheduled(fixedDelay = 15000)
     public void sendMock() {
-        int a = ThreadLocalRandom.current().nextInt();
-        TransactionStatus status;
-        if (a % 2 == 0) {
-            status = TransactionStatus.FAILURE;
-        } else {
-            status = TransactionStatus.SUCCESS;
-        }
-
-        ValidationResultDto dto = new ValidationResultDto(status.getDescription(), LocalDateTime.now(), List.of());
-        messagingTemplate.convertAndSend("/topic/transactions", dto);
+        messagingTemplate.convertAndSend("/topic/transactions", new DtoForFrontend(ThreadLocalRandom.current().nextInt(0,1000), ThreadLocalRandom.current().nextInt(0,1000), ThreadLocalRandom.current().nextInt(0,1000)));
         System.out.println("SEND MOCK");
     }
 }

@@ -19,8 +19,8 @@ public class PaymentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "transaction_id")
-    private UUID transactionId;
+    @Column(name = "payment_id")
+    private UUID paymentId;
     @Column(name = "created", updatable = false)
     private LocalDateTime created;
     @Column(name = "last_updated")
@@ -32,8 +32,8 @@ public class PaymentEntity {
     @Column(name = "last_sum")
     private Long lastSum;
 
-    public PaymentEntity(UUID transactionId) {
-        this.transactionId = transactionId;
+    public PaymentEntity(UUID paymentId) {
+        this.paymentId = paymentId;
         this.created = LocalDateTime.now();
         this.lastUpdated = LocalDateTime.now();
     }
