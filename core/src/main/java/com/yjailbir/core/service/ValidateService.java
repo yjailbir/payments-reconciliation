@@ -27,7 +27,7 @@ public class ValidateService {
         boolean failure = false;
         boolean warning = false;
         if (paymentEntity.isPresent()) {
-            List<TransactionEntity> transactionEntities = transactionsRepository.findAllByPaymentIdOrderByTimestampDesc(entity.getPaymentId());
+            List<TransactionEntity> transactionEntities = transactionsRepository.findAllByPaymentIdOrderByTimestampAsc(entity.getPaymentId());
             List<String> errors = new ArrayList<>();
             List<String> warnings = new ArrayList<>();
             //Если в цепочке одна транзакция

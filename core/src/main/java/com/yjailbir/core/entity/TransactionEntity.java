@@ -25,7 +25,7 @@ public class TransactionEntity {
     private UUID id;
     @Column(name = "payment_id")
     private UUID paymentId;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "chain_id")
     private PaymentEntity chain;
     @Enumerated(EnumType.STRING)
