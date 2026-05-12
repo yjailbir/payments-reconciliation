@@ -60,13 +60,13 @@ public class MockBankService {
             int failureCount = 0;
             int warningCount = 0;
 
-           if (a == 1 || a == 2) {
-               dto2.setSumOut(243000L);
+           if (a == 1) {
+               dto1.setSumOut(243000L);
                failureCount++;
                successCount--;
            }
            if (a == 4) {
-               dto3.setSumOut(240000L);
+               dto2.setSumOut(240000L);
                failureCount++;
                successCount--;
            }
