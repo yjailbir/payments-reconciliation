@@ -2,8 +2,6 @@ package com.yjailbir.core.service;
 
 import com.yjailbir.core.dto.DtoForFrontend;
 import com.yjailbir.core.dto.TransactionDtoFromBank;
-import com.yjailbir.core.dto.TransactionStatus;
-import com.yjailbir.core.dto.ValidationResultDto;
 import com.yjailbir.core.entity.PaymentEntity;
 import com.yjailbir.core.entity.TransactionEntity;
 import com.yjailbir.core.repository.PaymentsRepository;
@@ -13,8 +11,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service

@@ -10,5 +10,5 @@ import java.util.UUID;
 @Repository
 public interface TransactionsRepository extends JpaRepository<TransactionEntity, UUID> {
     //От поздних к ранним
-    List<TransactionEntity> findAllByTransactionIdOrderByTimestampDesc(UUID transactionId);
+    List<TransactionEntity> findAllByPaymentIdOrderByTimestampDesc(UUID transactionId);
 }
