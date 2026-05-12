@@ -59,7 +59,7 @@ public class MockBankService {
 
             boolean useDto3 = true;
 
-            if (List.of(3,7,9).contains(a)) {
+            if (List.of(3,7,9,4).contains(a)) {
                 useDto3 = false;
             }
 
@@ -86,6 +86,14 @@ public class MockBankService {
                 dto1.setCommissionPercents(4);
                 failureCount++;
                 successCount--;
+            }
+            if (a == 7) {
+                dto2.setSumOut(12000L);
+                failureCount++;
+                successCount--;
+                dto3.setSumOut(230000L);
+                successCount--;
+                failureCount++;
             }
             if (a == 10) {
                 List<String> banksCopy = new ArrayList<>(BANKS);
