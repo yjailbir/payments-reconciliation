@@ -52,12 +52,10 @@ public class ValidateService {
                 //Транзакций несколько, надо проверять соседей
                 //Проверяем текущую и предыдущую
                 TransactionEntity previousTransaction = null;
-                for (int i = 0; i < transactionEntities.size(); i++) {
+                for (int i = 1; i < transactionEntities.size(); i++) {
                     if (transactionEntities.get(i).getId().equals(entity.getId())) {
-                        if (i > 0) {
-                            previousTransaction = transactionEntities.get(i - 1);
-                        }
-                        break;  // выходим из цикла, как только нашли
+                        previousTransaction = transactionEntities.get(i - 1);
+                        break;
                     }
                 }
                 if (previousTransaction != null) {
