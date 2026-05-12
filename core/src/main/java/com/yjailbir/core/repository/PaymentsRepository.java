@@ -9,5 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface PaymentsRepository extends JpaRepository<PaymentEntity, Long> {
-    Optional<PaymentEntity> findByTransactionId(UUID transactionId);
+    Optional<PaymentEntity> findByPaymentId(UUID transactionId);
 }
