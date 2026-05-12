@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -16,95 +17,75 @@ import java.util.concurrent.ThreadLocalRandom;
 public class MockBankService {
     private final TransactionChainService transactionChainService;
     private final SimpMessagingTemplate messagingTemplate;
-    List<TransactionType> types =  new ArrayList<>(List.of(TransactionType.values()));
-    List<String> banks = new ArrayList<>(List.of("Asakabank", "InFinBank", " Ipak Yuli Bank", "Hamkorbank"));
+
+    private static final List<TransactionType> TYPES = List.of(TransactionType.values());
+    private static final List<String> BANKS = List.of("Asakabank", "InFinBank", "Ipak Yuli Bank", "Hamkorbank");
 
     @Scheduled(fixedRate = 1000)
-    private void generateDto() throws InterruptedException {
-        Integer a = ThreadLocalRandom.current().nextInt(0, 11);
+    public void generateDto() {
+        try {
+            int a = ThreadLocalRandom.current().nextInt(0, 11);
+            UUID paymentUUID = UUID.randomUUID();
 
-        UUID paymentUUID = UUID.randomUUID();
-        Collections.shuffle(types);
-        Collections.shuffle(banks);
+            List<TransactionType> shuffledTypes = new ArrayList<>(TYPES);
+            List<String> shuffledBanks = new ArrayList<>(BANKS);
+            Collections.shuffle(shuffledTypes);
+            Collections.shuffle(shuffledBanks);
 
-        TransactionDtoFromBank dto1 = new TransactionDtoFromBank(
-                paymentUUID,
-                UUID.randomUUID(),
-                types.getFirst(),
-                banks.getFirst(),
-                banks.getLast(),
-                250000L,
-                245000L,
-                5000L,
-                2,
-                0,
-                "HALF_UP",
-                true,
-                LocalDateTime.now(),
-                "UZS",
-                "UZS",
-                1D,
-                ""
-        );
+            TransactionDtoFromBank dto1 = new TransactionDtoFromBank(
+                    paymentUUID, UUID.randomUUID(),
+                    shuffledTypes.get(0), shuffledBanks.get(0), shuffledBanks.get(1),
+                    250000L, 245000L, 5000L, 2, 0, "HALF_UP", true,
+                    LocalDateTime.now(), "UZS", "UZS", 1D, "");
 
-        Collections.shuffle(types);
-        Collections.shuffle(banks);
+            Collections.shuffle(shuffledTypes);
+            Collections.shuffle(shuffledBanks);
 
-        TransactionDtoFromBank dto2 = new TransactionDtoFromBank(
-                paymentUUID,
-                UUID.randomUUID(),
-                types.getFirst(),
-                dto1.getTo(),
-                banks.getFirst(),
-                245000L,
-                240000L,
-                5000L,
-                0,
-                5000,
-                "HALF_UP",
-                true,
-                LocalDateTime.now().plusSeconds(123),
-                "UZS",
-                "UZS",
-                1D,
-                ""
-        );
+            TransactionDtoFromBank dto2 = new TransactionDtoFromBank(
+                    paymentUUID, UUID.randomUUID(),
+                    shuffledTypes.get(0), dto1.getTo(), shuffledBanks.get(0),
+                    245000L, 240000L, 5000L, 0, 5000, "HALF_UP", true,
+                    LocalDateTime.now().plusSeconds(123), "UZS", "UZS", 1D, "");
 
-        Integer successCount = 2;
-        Integer failureCount = 0;
-        Integer warningCount = 0;
+            int successCount = 2;
+            int failureCount = 0;
+            int warningCount = 0;
 
-        if (a == 4) {
-            dto2.setSumOut(22000L);
-            failureCount++;
-            successCount--;
+            if (a == 4) {
+                dto2.setSumOut(22000L);
+                failureCount++;
+                successCount--;
+            }
+            if (a == 8) {
+                dto1.setCommissionPercents(4);
+                failureCount++;
+                successCount--;
+            }
+            if (a == 10) {
+                List<String> banksCopy = new ArrayList<>(BANKS);
+                Collections.shuffle(banksCopy);
+                dto2.setFrom(banksCopy.get(0));
+                warningCount++;
+                successCount--;
+            }
+
+            ValidationResultDto res1 = transactionChainService.saveAndValidate(dto1);
+            ValidationResultDto res2 = transactionChainService.saveAndValidate(dto2);
+
+            OneTransactionComment comment1 = new OneTransactionComment(
+                    dto1.getTransactionId(), res1.errors(), res1.warnings());
+            OneTransactionComment comment2 = new OneTransactionComment(
+                    dto2.getTransactionId(), res2.errors(), res2.warnings());
+
+            DtoForWebSocket payload = new DtoForWebSocket(successCount, warningCount, failureCount,
+                    List.of(comment1, comment2));
+
+            // Отправляем неблокирующе – если RabbitMQ притормозит, планировщик не встанет
+            CompletableFuture.runAsync(() -> messagingTemplate.convertAndSend("/topic/transactions", payload));
+
+        } catch (Exception e) {
+            // Логируйте ошибку! Иначе если что-то упало, вы не узнаете.
+            // logger.error("Ошибка генерации mock-транзакции", e);
         }
-        if (a == 8) {
-            dto1.setCommissionPercents(4);
-            failureCount++;
-            successCount--;
-        }
-        if (a == 10) {
-            Collections.shuffle(banks);
-            dto2.setFrom(banks.getFirst());
-            warningCount++;
-            successCount--;
-        }
-
-        ValidationResultDto res1 = transactionChainService.saveAndValidate(dto1);
-        ValidationResultDto res2 = transactionChainService.saveAndValidate(dto2);
-
-        OneTransactionComment comment1 = new OneTransactionComment(
-                dto1.getTransactionId(),
-                res1.errors(),
-                res1.warnings()
-        );
-        OneTransactionComment comment2 = new OneTransactionComment(
-                dto2.getTransactionId(),
-                res2.errors(),
-                res2.warnings()
-        );
-
-        messagingTemplate.convertAndSend("/topic/transactions", new DtoForWebSocket(successCount, warningCount, failureCount, List.of(comment1, comment2)));
     }
 }

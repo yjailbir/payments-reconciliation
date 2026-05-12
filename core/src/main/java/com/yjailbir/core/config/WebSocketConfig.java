@@ -23,8 +23,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setClientPasscode("guest")
                 .setSystemLogin("guest")
                 .setSystemPasscode("guest")
-                .setSystemHeartbeatSendInterval(4000)
-                .setSystemHeartbeatReceiveInterval(4000);
+                .setSystemHeartbeatSendInterval(25000)
+                .setSystemHeartbeatReceiveInterval(25000);
         // Префикс для сообщений от клиента (не используется)
         registry.setApplicationDestinationPrefixes("/app");
     }
