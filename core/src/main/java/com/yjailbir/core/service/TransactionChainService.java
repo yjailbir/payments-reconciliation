@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ public class TransactionChainService {
     private final TransactionsRepository transactionsRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
+    @Transactional
     public void saveAndValidate(TransactionDtoFromBank dto) {
         PaymentEntity chain = paymentsRepository
                 .findByPaymentId(dto.paymentId())
