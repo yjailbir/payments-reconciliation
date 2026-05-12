@@ -6,15 +6,11 @@ import com.yjailbir.core.entity.TransactionEntity;
 import com.yjailbir.core.repository.PaymentsRepository;
 import com.yjailbir.core.repository.TransactionsRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
@@ -38,19 +34,6 @@ public class TransactionChainService {
         return validateService.validate(step);
     }
 
-    private void save(TransactionDtoFromBank dto) {
-        PaymentEntity chain = paymentsRepository
-                .findByPaymentId(dto.getPaymentId())
-                .orElseGet(() -> {
-                    PaymentEntity newChain = new PaymentEntity(dto.getPaymentId());
-                    return paymentsRepository.save(newChain);
-                });
-
-        TransactionEntity step = new TransactionEntity(dto, chain);
-        chain.addStep(step);
-        paymentsRepository.save(chain);
-    }
-
     public List<PaymentDtoForFrontend> getAllPayments() {
         return paymentsRepository.findTop1000O().stream().map(PaymentEntity::toDto).toList();
     }
@@ -66,26 +49,4 @@ public class TransactionChainService {
     public List<TransactionDtoForFrontend> getAllTransactionsByPaymentId(UUID paymentId) {
        return transactionsRepository.findAllByPaymentIdOrderByTimestampAsc(paymentId).stream().map(TransactionEntity::toDto).toList();
     }
-
-    /*@Scheduled(fixedDelay = 15000)
-    public void sendMock() {
-        Integer success = ThreadLocalRandom.current().nextInt(0, 1000);
-        Integer failure = ThreadLocalRandom.current().nextInt(0, 1000);
-        Integer warning = ThreadLocalRandom.current().nextInt(0, 1000);
-
-        List<OneTransactionComment> comments = new ArrayList<>();
-
-        for (int i = 1; i <= failure; i++) {
-            List<String> warnings = List.of("Warning text", "Another Warning text");
-            List<String> errors = List.of("Error text", "Another Error text");
-            comments.add(new OneTransactionComment(
-                    UUID.randomUUID(),
-                    errors,
-                    warnings
-            ));
-        }
-
-        messagingTemplate.convertAndSend("/topic/transactions", new DtoForWebSocket(success, warning, failure, comments));
-        System.out.println("SEND MOCK");
-    }*/
 }
