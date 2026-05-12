@@ -33,6 +33,12 @@ public class TransactionsRestController {
         return ResponseEntity.ok().body(transactionChainService.getAllPayments());
     }
 
+    @GetMapping("/transactions")
+    public ResponseEntity<List<TransactionDtoForFrontend>> getTransactions(){
+        return ResponseEntity.ok().body(transactionChainService.getAllTransactions());
+    }
+
+
     @GetMapping("/payment")
     public ResponseEntity<PaymentDtoForFrontend> getPaymentById(@RequestParam UUID id){
         return ResponseEntity.ok().body(transactionChainService.getPaymentById(id));

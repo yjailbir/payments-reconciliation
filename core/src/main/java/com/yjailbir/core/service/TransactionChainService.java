@@ -25,7 +25,7 @@ public class TransactionChainService {
     private final SimpMessagingTemplate messagingTemplate;
 
     @Transactional
-    public void saveAndValidate(TransactionDtoFromBank dto) {
+    public ValidationResultDto saveAndValidate(TransactionDtoFromBank dto) {
         PaymentEntity chain = paymentsRepository
                 .findByPaymentId(dto.paymentId())
                 .orElseGet(() -> {
@@ -36,9 +36,9 @@ public class TransactionChainService {
         TransactionEntity step = new TransactionEntity(dto, chain);
         chain.addStep(step);
         paymentsRepository.save(chain);
-        ValidationResultDto result = validateService.validate(step);
+        return validateService.validate(step);
 
-        messagingTemplate.convertAndSend("/topic/transactions", result);
+        //messagingTemplate.convertAndSend("/topic/transactions", result);
     }
 
     public List<PaymentDtoForFrontend> getAllPayments() {
@@ -51,6 +51,10 @@ public class TransactionChainService {
 
     public TransactionDtoForFrontend getTransactionById(UUID transactionId) {
         return transactionsRepository.findById(transactionId).get().toDto();
+    }
+
+    public List<TransactionDtoForFrontend> getAllTransactions() {
+        return transactionsRepository.findAll().stream().map(TransactionEntity::toDto).toList();
     }
 
     /*@Scheduled(fixedDelay = 15000)

@@ -2,6 +2,7 @@ package com.yjailbir.core.service;
 
 import com.yjailbir.core.dto.TransactionDtoFromBank;
 import com.yjailbir.core.dto.TransactionType;
+import com.yjailbir.core.dto.ValidationResultDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -74,7 +75,7 @@ public class MockBankService {
                 ""
         );
 
-        transactionChainService.saveAndValidate(dto1);
+        ValidationResultDto res1= transactionChainService.saveAndValidate(dto1);
         Thread.sleep(1000);
         transactionChainService.saveAndValidate(dto2);
     }
