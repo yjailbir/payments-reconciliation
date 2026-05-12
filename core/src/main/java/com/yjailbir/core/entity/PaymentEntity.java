@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "transaction_chains")
+@Table(name = "payments")
 @Getter
 @Setter
 @NoArgsConstructor

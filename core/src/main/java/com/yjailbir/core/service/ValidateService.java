@@ -33,7 +33,7 @@ public class ValidateService {
             if (transactionEntities.size() == 1) {
                 TransactionEntity transactionEntity = transactionEntities.getFirst();
                 //Если это проверямая транзакция
-                if (transactionEntity.getPaymentId().equals(entity.getPaymentId())) {
+                if (transactionEntity.getPaymentId().equals(entity.getPaymentId()) && transactionEntity.getStatus().equals(TransactionStatus.PENDING)) {
                     //Валидируем её
                     result.addAll(validateInnerTransactionData(entity));
 
@@ -43,8 +43,9 @@ public class ValidateService {
                         failure = true;
                     }
                 } else {
-                    //Иначе такой транзакции нет (по идее эта ветка никогда не сработает)
-                    return new ValidationResultDto(TransactionStatus.NOT_FOUND.getDescription(), entity.getTimestamp(), List.of());
+                    failure = true;
+                    entity.setStatus(TransactionStatus.FAILURE);
+                    result.add("Дубликат транзакции!");
                 }
             } else {
                 //Транзакций несколько, надо проверять соседей

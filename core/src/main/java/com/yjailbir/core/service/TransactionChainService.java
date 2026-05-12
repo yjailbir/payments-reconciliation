@@ -40,7 +40,7 @@ public class TransactionChainService {
     }
 
     public List<PaymentDtoForFrontend> getAllPayments() {
-        return paymentsRepository.findAll().stream().map(PaymentEntity::toDto).toList();
+        return paymentsRepository.findTop1000O().stream().map(PaymentEntity::toDto).toList();
     }
 
     public PaymentDtoForFrontend getPaymentById(UUID paymentId) {
