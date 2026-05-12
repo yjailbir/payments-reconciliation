@@ -56,19 +56,7 @@ public class MockBankService {
                     240000L, 223000L, 17000L, 5, 5000, "HALF_UP", true,
                     dto2.getTimestamp().plusSeconds(46), "UZS", "UZS", 1D, "");
 
-
-            boolean useDto3 = true;
-
-            if (List.of(3,7,9,4).contains(a)) {
-                useDto3 = false;
-            }
-
-            int successCount;
-            if (useDto3) {
-                successCount = 3;
-            } else {
-                successCount = 2;
-            }
+            int successCount = 3;
             int failureCount = 0;
             int warningCount = 0;
 
@@ -105,30 +93,18 @@ public class MockBankService {
 
             ValidationResultDto res1 = transactionChainService.saveAndValidate(dto1);
             ValidationResultDto res2 = transactionChainService.saveAndValidate(dto2);
-            ValidationResultDto res3 = null;
-            if (useDto3) {
-                res3 = transactionChainService.saveAndValidate(dto3);
-            }
+            ValidationResultDto res3 = transactionChainService.saveAndValidate(dto3);
 
             OneTransactionComment comment1 = new OneTransactionComment(
                     dto1.getTransactionId(), res1.errors(), res1.warnings());
             OneTransactionComment comment2 = new OneTransactionComment(
                     dto2.getTransactionId(), res2.errors(), res2.warnings());
-            OneTransactionComment comment3 = null;
-            if (useDto3) {
-                comment3 = new OneTransactionComment(
-                        dto3.getTransactionId(), res3.errors(), res3.warnings()
-                );
-            }
+            OneTransactionComment comment3 = new OneTransactionComment(
+                    dto3.getTransactionId(), res3.errors(), res3.warnings()
+            );
 
-            DtoForWebSocket payload;
-            if (useDto3) {
-                payload = new DtoForWebSocket(successCount, warningCount, failureCount,
-                        List.of(comment1, comment2, comment3));
-            } else {
-                payload = new DtoForWebSocket(successCount, warningCount, failureCount,
-                        List.of(comment1, comment2));
-            }
+            DtoForWebSocket payload = new DtoForWebSocket(successCount, warningCount, failureCount,
+                    List.of(comment1, comment2, comment3));
 
 
             // Отправляем неблокирующе – если RabbitMQ притормозит, планировщик не встанет
