@@ -60,11 +60,11 @@ public class TransactionEntity {
     private String toCurrency;
     @Column(name = "course")
     private Double multiplier;
-    @Column(name = "not_counted_history")
+    @Column(name = "not_counted_history", columnDefinition = "TEXT")
     String notCountedHistory;
-    @Column(name = "warning_comments")
+    @Column(name = "warning_comments", columnDefinition = "TEXT")
     private String warningComments;
-    @Column(name = "error_comments")
+    @Column(name = "error_comments", columnDefinition = "TEXT")
     private String errorComments;
 
     public TransactionEntity(TransactionDtoFromBank dto, PaymentEntity chain) {
