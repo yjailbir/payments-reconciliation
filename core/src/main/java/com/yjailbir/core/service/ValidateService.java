@@ -85,6 +85,7 @@ public class ValidateService {
                 }
             }
 
+            transactionsRepository.save(entity);
             if (failure) {
                 return new ValidationResultDto(TransactionStatus.FAILURE.getDescription(), entity.getTimestamp(), result);
             } else if (warning) {

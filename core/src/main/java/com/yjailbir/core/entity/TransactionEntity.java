@@ -87,6 +87,8 @@ public class TransactionEntity {
         this.toCurrency = dto.toCurrency();
         this.multiplier = dto.multiplier();
         this.notCountedHistory = dto.notCountedHistory();
+        this.warningComments = "";
+        this.errorComments = "";
     }
 
     public TransactionDtoForFrontend toDto() {
