@@ -1,17 +1,14 @@
 package com.yjailbir.core.service;
 
-import com.yjailbir.core.dto.DtoForWebSocket;
-import com.yjailbir.core.dto.OneTransactionComment;
-import com.yjailbir.core.dto.TransactionDtoFromBank;
-import com.yjailbir.core.dto.ValidationResultDto;
+import com.yjailbir.core.dto.*;
 import com.yjailbir.core.entity.PaymentEntity;
 import com.yjailbir.core.entity.TransactionEntity;
 import com.yjailbir.core.repository.PaymentsRepository;
+import com.yjailbir.core.repository.TransactionsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,10 +20,9 @@ import java.util.concurrent.ThreadLocalRandom;
 public class TransactionChainService {
     private final ValidateService validateService;
     private final PaymentsRepository paymentsRepository;
+    private final TransactionsRepository transactionsRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
-
-    @Transactional
     public void saveAndValidate(TransactionDtoFromBank dto) {
         PaymentEntity chain = paymentsRepository
                 .findByPaymentId(dto.paymentId())
@@ -41,6 +37,18 @@ public class TransactionChainService {
         ValidationResultDto result = validateService.validate(step);
 
         messagingTemplate.convertAndSend("/topic/transactions", result);
+    }
+
+    public List<PaymentDtoForFrontend> getAllPayments() {
+        return paymentsRepository.findAll().stream().map(PaymentEntity::toDto).toList();
+    }
+
+    public PaymentDtoForFrontend getPaymentById(UUID paymentId) {
+        return paymentsRepository.findByPaymentId(paymentId).get().toDto();
+    }
+
+    public TransactionDtoForFrontend getTransactionById(UUID transactionId) {
+        return transactionsRepository.findById(transactionId).get().toDto();
     }
 
     @Scheduled(fixedDelay = 15000)

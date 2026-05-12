@@ -1,5 +1,7 @@
 package com.yjailbir.core.controller.rest;
 
+import com.yjailbir.core.dto.PaymentDtoForFrontend;
+import com.yjailbir.core.dto.TransactionDtoForFrontend;
 import com.yjailbir.core.dto.TransactionDtoFromBank;
 import com.yjailbir.core.service.TransactionChainService;
 import lombok.Getter;
@@ -9,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 
 @RestController
@@ -25,5 +28,18 @@ public class TransactionsRestController {
         }
     }
 
+    @GetMapping("/payments")
+    public ResponseEntity<List<PaymentDtoForFrontend>> getPayments(){
+        return ResponseEntity.ok().body(transactionChainService.getAllPayments());
+    }
 
+    @GetMapping("/payment")
+    public ResponseEntity<PaymentDtoForFrontend> getPaymentById(@RequestParam UUID id){
+        return ResponseEntity.ok().body(transactionChainService.getPaymentById(id));
+    }
+
+    @GetMapping("/transaction")
+    public ResponseEntity<TransactionDtoForFrontend> getTransactionById(@RequestParam UUID id){
+        return ResponseEntity.ok().body(transactionChainService.getTransactionById(id));
+    }
 }
