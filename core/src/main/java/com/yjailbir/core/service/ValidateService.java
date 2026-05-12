@@ -85,12 +85,17 @@ public class ValidateService {
                 }
             }
 
-            transactionsRepository.save(entity);
             if (failure) {
+                entity.setStatus(TransactionStatus.FAILURE);
+                transactionsRepository.save(entity);
                 return new ValidationResultDto(TransactionStatus.FAILURE.getDescription(), entity.getTimestamp(), result);
             } else if (warning) {
+                entity.setStatus(TransactionStatus.WARNING);
+                transactionsRepository.save(entity);
                 return new ValidationResultDto(TransactionStatus.WARNING.getDescription(), entity.getTimestamp(), result);
             } else {
+                entity.setStatus(TransactionStatus.SUCCESS);
+                transactionsRepository.save(entity);
                 return new ValidationResultDto(TransactionStatus.SUCCESS.getDescription(), entity.getTimestamp(), result);
             }
         } else {
