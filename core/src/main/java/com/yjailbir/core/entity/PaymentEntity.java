@@ -56,8 +56,6 @@ public class PaymentEntity {
                 status = TransactionStatus.FAILURE;
                 break;
             }
-
-            return new PaymentDtoForFrontend(paymentId, status.getDescription(), created, lastUpdated);
         }
 
         return new PaymentDtoForFrontend(paymentId, status.getDescription(), created, lastUpdated);
